@@ -914,8 +914,19 @@ textarea{
 const TASK_KEY = "unitask_tasks_v1";
 const COURSE_KEY = "unitask_courses_v1";
 
+/* Supabase: almacenamiento compartido */
+const SUPABASE_URL = "https://jyznqkmxzquajxagywru.supabase.co";
+const SUPABASE_KEY = "sb_publishable_7lxWrK_pUPW68XOA1PC6Aw_aoafA42n";
+const SUPABASE_HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": `Bearer ${SUPABASE_KEY}`,
+    "Content-Type": "application/json"
+};
+
 let tasks = JSON.parse(localStorage.getItem(TASK_KEY) || "[]");
 let courses = JSON.parse(localStorage.getItem(COURSE_KEY) || "[]");
+let cloudReady = false;
+let cloudSyncTimer = null;
 
 let currentView = "dashboard";
 let editingTaskId = null;
@@ -944,6 +955,117 @@ function escapeHTML(value=""){
 function save(){
     localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
     localStorage.setItem(COURSE_KEY, JSON.stringify(courses));
+
+    if(cloudReady){
+        clearTimeout(cloudSyncTimer);
+        cloudSyncTimer = setTimeout(() => {
+            syncAllToCloud().catch(showCloudError);
+        }, 150);
+    }
+}
+
+function showCloudError(error){
+    console.error("UniTask / Supabase:", error);
+    const message = String(error && error.message ? error.message : error);
+    if(!window.__unitaskCloudErrorShown){
+        window.__unitaskCloudErrorShown = true;
+        alert("No se logró sincronizar con la base compartida. Los cambios permanecen guardados en este navegador.\n\nDetalle: " + message);
+        setTimeout(() => window.__unitaskCloudErrorShown = false, 5000);
+    }
+}
+
+async function supabaseRequest(path, options={}){
+    const response = await fetch(SUPABASE_URL + "/rest/v1/" + path, {
+        ...options,
+        headers:{...SUPABASE_HEADERS, ...(options.headers || {})}
+    });
+    if(!response.ok){
+        const text = await response.text();
+        throw new Error(`${response.status}: ${text}`);
+    }
+    if(response.status === 204) return null;
+    const text = await response.text();
+    return text ? JSON.parse(text) : null;
+}
+
+function courseToDb(c){
+    return {id:c.id, name:c.name, code:c.code || "", professor:c.professor || "", schedule:c.schedule || "", classroom:c.room || "", color:c.color || "#7c6df2", notes:c.notes || ""};
+}
+function courseFromDb(c){
+    return {id:c.id, name:c.name, code:c.code || "", professor:c.professor || "", schedule:c.schedule || "", room:c.classroom || "", color:c.color || "#7c6df2", notes:c.notes || ""};
+}
+function taskToDb(t){
+    return {id:t.id, name:t.name, course_id:t.courseId || null, course:t.course || "", type:t.type || "Tarea", status:t.status || "No iniciada", priority:t.priority || "Media", date:t.date || "", time:t.time || "", modality:t.mode || "Individual", progress:Number(t.progress || 0), responsible:t.responsible || "", link:t.link || "", notes:t.notes || ""};
+}
+function taskFromDb(t){
+    return {id:t.id, name:t.name, courseId:t.course_id || "", course:t.course || "", type:t.type || "Tarea", status:t.status || "No iniciada", priority:t.priority || "Media", date:t.date || "", time:t.time || "", mode:t.modality || "Individual", progress:Number(t.progress || 0), responsible:t.responsible || "", link:t.link || "", notes:t.notes || ""};
+}
+
+async function replaceTable(table, rows){
+    const existing = await supabaseRequest(`${table}?select=id`);
+    const wanted = new Set(rows.map(r => String(r.id)));
+    const obsolete = (existing || []).filter(r => !wanted.has(String(r.id)));
+
+    if(rows.length){
+        await supabaseRequest(`${table}?on_conflict=id`, {
+            method:"POST",
+            headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},
+            body:JSON.stringify(rows)
+        });
+    }
+    for(const row of obsolete){
+        await supabaseRequest(`${table}?id=eq.${encodeURIComponent(row.id)}`, {method:"DELETE", headers:{"Prefer":"return=minimal"}});
+    }
+}
+
+async function syncAllToCloud(){
+    // Los cursos se sincronizan primero por la llave foránea de las tareas.
+    await replaceTable("courses", courses.map(courseToDb));
+    await replaceTable("tasks", tasks.map(taskToDb));
+}
+
+async function loadCloudData(){
+    const [cloudCourses, cloudTasks] = await Promise.all([
+        supabaseRequest("courses?select=*&order=created_at.asc"),
+        supabaseRequest("tasks?select=*&order=created_at.asc")
+    ]);
+
+    const hasCloudData = (cloudCourses && cloudCourses.length) || (cloudTasks && cloudTasks.length);
+    const hasLocalData = courses.length || tasks.length;
+
+    cloudReady = true;
+
+    // Primera conexión: si Supabase está vacío, se migran los datos actuales del navegador.
+    if(!hasCloudData && hasLocalData){
+        await syncAllToCloud();
+        return;
+    }
+
+    courses = (cloudCourses || []).map(courseFromDb);
+    tasks = (cloudTasks || []).map(taskFromDb);
+    localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
+    localStorage.setItem(COURSE_KEY, JSON.stringify(courses));
+}
+
+async function refreshFromCloud(){
+    if(!cloudReady) return;
+    try{
+        const [cloudCourses, cloudTasks] = await Promise.all([
+            supabaseRequest("courses?select=*&order=created_at.asc"),
+            supabaseRequest("tasks?select=*&order=created_at.asc")
+        ]);
+        const nextCourses = (cloudCourses || []).map(courseFromDb);
+        const nextTasks = (cloudTasks || []).map(taskFromDb);
+        if(JSON.stringify(nextCourses) !== JSON.stringify(courses) || JSON.stringify(nextTasks) !== JSON.stringify(tasks)){
+            courses = nextCourses;
+            tasks = nextTasks;
+            localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
+            localStorage.setItem(COURSE_KEY, JSON.stringify(courses));
+            render();
+        }
+    }catch(error){
+        console.error("No se logró actualizar desde Supabase:", error);
+    }
 }
 
 function formatDate(date){
@@ -2533,7 +2655,21 @@ function importData(event){
    INICIO
 ========================================================= */
 
-render();
+async function startUniTask(){
+    // Se muestra inmediatamente el respaldo local mientras llega la nube.
+    render();
+    try{
+        await loadCloudData();
+        render();
+        // Actualización automática para reflejar cambios de otros integrantes.
+        setInterval(refreshFromCloud, 5000);
+    }catch(error){
+        cloudReady = false;
+        showCloudError(error);
+    }
+}
+
+startUniTask();
 
 </script>
 
