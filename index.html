@@ -2334,7 +2334,7 @@ function renderCalendar(){
         day.setDate(gridStart.getDate()+i);
         const iso = localISO(day);
         const dayTasks = tasks
-            .filter(t => t.date === iso)
+            .filter(t => t.date === iso && t.status !== "Completada")
             .sort((a,b)=>(a.time||"23:59").localeCompare(b.time||"23:59"));
         const other = day.getMonth() !== month ? " other" : "";
         const isToday = day.getFullYear()===today.getFullYear() && day.getMonth()===today.getMonth() && day.getDate()===today.getDate() ? " today" : "";
