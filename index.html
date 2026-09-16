@@ -1015,7 +1015,7 @@ function getCourse(courseId){
     return courses.find(c => c.id === courseId);
 }
 
-function courseName(task){
+function getTaskCourseName(task){
 
     const course = getCourse(task.courseId);
 
@@ -1454,7 +1454,7 @@ function filterTasks(){
                 (
                     task.name +
                     " " +
-                    courseName(task) +
+                    getTaskCourseName(task) +
                     " " +
                     (task.responsible || "")
                 ).toLowerCase();
@@ -1526,7 +1526,7 @@ function renderTaskTable(list){
                 </td>
 
                 <td>
-                    ${escapeHTML(courseName(task))}
+                    ${escapeHTML(getTaskCourseName(task))}
                 </td>
 
                 <td>
@@ -2037,31 +2037,16 @@ function openCourseModal(course=null){
         ? "Editar curso"
         : "Nuevo curso";
 
-    courseColor.value =
-        "#7c6df2";
+    document.getElementById("courseColor").value = "#7c6df2";
 
     if(course){
-
-        courseName.value =
-            course.name || "";
-
-        courseCode.value =
-            course.code || "";
-
-        courseProfessor.value =
-            course.professor || "";
-
-        courseSchedule.value =
-            course.schedule || "";
-
-        courseRoom.value =
-            course.room || "";
-
-        courseColor.value =
-            course.color || "#7c6df2";
-
-        courseNotes.value =
-            course.notes || "";
+        document.getElementById("courseName").value = course.name || "";
+        document.getElementById("courseCode").value = course.code || "";
+        document.getElementById("courseProfessor").value = course.professor || "";
+        document.getElementById("courseSchedule").value = course.schedule || "";
+        document.getElementById("courseRoom").value = course.room || "";
+        document.getElementById("courseColor").value = course.color || "#7c6df2";
+        document.getElementById("courseNotes").value = course.notes || "";
     }
 
     document
@@ -2090,87 +2075,68 @@ document
 
             event.preventDefault();
 
-            const name =
-                courseName.value.trim();
+            const nameInput = document.getElementById("courseName");
+            const codeInput = document.getElementById("courseCode");
+            const professorInput = document.getElementById("courseProfessor");
+            const scheduleInput = document.getElementById("courseSchedule");
+            const roomInput = document.getElementById("courseRoom");
+            const colorInput = document.getElementById("courseColor");
+            const notesInput = document.getElementById("courseNotes");
 
-            const duplicate =
-                courses.find(
-                    c =>
-                    c.name.toLowerCase() ===
-                    name.toLowerCase() &&
+            if (!nameInput.value.trim()) {
+                nameInput.focus();
+                return;
+            }
+
+            const name = nameInput.value.trim();
+
+            const duplicate = courses.find(
+                c =>
+                    String(c.name || "").toLowerCase() === name.toLowerCase() &&
                     c.id !== editingCourseId
-                );
+            );
 
-            if(duplicate){
-
-                alert(
-                    "Ya existe un curso con ese nombre."
-                );
-
+            if (duplicate) {
+                alert("Ya existe un curso con ese nombre.");
                 return;
             }
 
             const data = {
-
-                id:
-                    editingCourseId || id(),
-
-                name:name,
-
-                code:
-                    courseCode.value.trim(),
-
-                professor:
-                    courseProfessor.value.trim(),
-
-                schedule:
-                    courseSchedule.value.trim(),
-
-                room:
-                    courseRoom.value.trim(),
-
-                color:
-                    courseColor.value,
-
-                notes:
-                    courseNotes.value.trim()
+                id: editingCourseId || id(),
+                name: name,
+                code: codeInput.value.trim(),
+                professor: professorInput.value.trim(),
+                schedule: scheduleInput.value.trim(),
+                room: roomInput.value.trim(),
+                color: colorInput.value || "#7c6df2",
+                notes: notesInput.value.trim()
             };
 
-            if(editingCourseId){
+            if (editingCourseId) {
+                const index = courses.findIndex(c => c.id === editingCourseId);
 
-                const index =
-                    courses.findIndex(
-                        c => c.id === editingCourseId
-                    );
+                if (index === -1) {
+                    alert("No se encontró el curso que se intenta editar.");
+                    return;
+                }
 
                 courses[index] = data;
 
-                /* Actualiza también el nombre
-                   almacenado en tareas antiguas */
                 tasks.forEach(task => {
-
-                    if(
-                        task.courseId ===
-                        editingCourseId
-                    ){
+                    if (task.courseId === editingCourseId) {
                         task.course = data.name;
                     }
-
                 });
-
-            }else{
-
+            } else {
                 courses.push(data);
             }
 
             save();
 
-            document
-                .getElementById("courseDialog")
-                .close();
+            document.getElementById("courseDialog").close();
+            document.getElementById("courseForm").reset();
 
             editingCourseId = null;
-
             render();
         }
     );
@@ -2300,7 +2266,7 @@ function renderCalendar(){
                     <div class="muted"
                          style="margin-top:4px">
 
-                        ${escapeHTML(courseName(task))}
+                        ${escapeHTML(getTaskCourseName(task))}
                         ·
                         ${escapeHTML(task.type || "Tarea")}
 
