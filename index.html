@@ -1849,32 +1849,37 @@ function editTask(taskId){
     }
 }
 
+function confirmDeletion(elementName){
+    const firstConfirmation = confirm(
+        `¿Seguro que querés eliminar "${elementName}"?\n\nEsta acción eliminará la información seleccionada.`
+    );
+
+    if(!firstConfirmation){
+        return false;
+    }
+
+    const secondConfirmation = confirm(
+        `CONFIRMACIÓN FINAL\n\n¿Querés eliminar definitivamente "${elementName}"?\n\nEsta acción no se puede deshacer.`
+    );
+
+    return secondConfirmation;
+}
+
 function deleteTask(taskId){
 
-    const task =
-        tasks.find(
-            t => t.id === taskId
-        );
+    const task = tasks.find(t => t.id === taskId);
 
     if(!task){
         return;
     }
 
-    if(
-        confirm(
-            `¿Eliminar la tarea "${task.name}"?`
-        )
-    ){
-
-        tasks =
-            tasks.filter(
-                t => t.id !== taskId
-            );
-
-        save();
-
-        render();
+    if(!confirmDeletion(`la tarea ${task.name}`)){
+        return;
     }
+
+    tasks = tasks.filter(t => t.id !== taskId);
+    save();
+    render();
 }
 
 /* =========================================================
@@ -2178,21 +2183,13 @@ function deleteCourse(courseId){
         return;
     }
 
-    if(
-        confirm(
-            `¿Eliminar el curso "${course.name}"?`
-        )
-    ){
-
-        courses =
-            courses.filter(
-                c => c.id !== courseId
-            );
-
-        save();
-
-        render();
+    if(!confirmDeletion(`el curso ${course.name}`)){
+        return;
     }
+
+    courses = courses.filter(c => c.id !== courseId);
+    save();
+    render();
 }
 
 /* =========================================================
