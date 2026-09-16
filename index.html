@@ -1,0 +1,2590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniTask | Gestor Universitario</title>
+
+<style>
+:root{
+    --bg:#0f1115;
+    --sidebar:#15181e;
+    --card:#181c23;
+    --card2:#1d222b;
+    --border:#2a303b;
+    --text:#f3f4f6;
+    --muted:#9ca3af;
+    --accent:#7c6df2;
+    --accent2:#9387ff;
+    --danger:#ef4444;
+    --success:#22c55e;
+    --warning:#f59e0b;
+    --blue:#3b82f6;
+    --radius:12px;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
+
+button,input,select,textarea{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.app{
+    display:grid;
+    grid-template-columns:240px 1fr;
+    min-height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    background:var(--sidebar);
+    border-right:1px solid var(--border);
+    padding:22px 14px;
+    position:fixed;
+    width:240px;
+    height:100vh;
+    overflow:auto;
+}
+
+.brand{
+    font-size:21px;
+    font-weight:800;
+    margin:0 10px 25px;
+}
+
+.brand span{
+    color:var(--accent2);
+}
+
+.nav{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.nav button{
+    background:transparent;
+    border:0;
+    color:var(--muted);
+    padding:11px 12px;
+    border-radius:8px;
+    text-align:left;
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.nav button:hover,
+.nav button.active{
+    background:#20242c;
+    color:white;
+}
+
+.sidebar-bottom{
+    margin-top:30px;
+    border-top:1px solid var(--border);
+    padding-top:15px;
+}
+
+.main{
+    grid-column:2;
+    padding:30px 38px;
+    max-width:1600px;
+    width:100%;
+}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    margin-bottom:30px;
+}
+
+.topbar h1{
+    margin:0;
+    font-size:28px;
+}
+
+.subtitle{
+    color:var(--muted);
+    margin-top:5px;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+/* BUTTONS */
+
+.btn{
+    border:1px solid var(--border);
+    background:#20242c;
+    color:white;
+    padding:10px 14px;
+    border-radius:8px;
+}
+
+.btn:hover{
+    background:#292e38;
+}
+
+.btn.primary{
+    background:var(--accent);
+    border-color:var(--accent);
+}
+
+.btn.primary:hover{
+    background:var(--accent2);
+}
+
+.btn.danger{
+    color:#fecaca;
+}
+
+.btn.small{
+    padding:6px 9px;
+    font-size:13px;
+}
+
+.icon-btn{
+    background:transparent;
+    border:0;
+    color:var(--muted);
+    font-size:22px;
+    padding:5px 8px;
+    border-radius:6px;
+}
+
+.icon-btn:hover{
+    background:#292e38;
+    color:white;
+}
+
+/* DASHBOARD */
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:14px;
+    margin-bottom:25px;
+}
+
+.stat{
+    background:var(--card);
+    border:1px solid var(--border);
+    padding:20px;
+    border-radius:var(--radius);
+}
+
+.stat-value{
+    font-size:29px;
+    font-weight:800;
+    margin-top:7px;
+}
+
+.stat-label{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:18px;
+}
+
+.panel{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px;
+}
+
+.panel-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.panel-title h2{
+    margin:0;
+    font-size:17px;
+}
+
+/* TABLE */
+
+.table-wrap{
+    overflow:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    color:var(--muted);
+    font-size:12px;
+    text-align:left;
+    font-weight:600;
+    padding:11px 9px;
+    border-bottom:1px solid var(--border);
+}
+
+td{
+    padding:12px 9px;
+    border-bottom:1px solid var(--border);
+    font-size:14px;
+    vertical-align:middle;
+}
+
+tr:hover td{
+    background:#1b1f27;
+}
+
+.task-title{
+    font-weight:600;
+}
+
+.muted{
+    color:var(--muted);
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    padding:4px 8px;
+    border-radius:20px;
+    font-size:12px;
+    white-space:nowrap;
+}
+
+.status-no{
+    background:#282d36;
+    color:#d1d5db;
+}
+
+.status-progress{
+    background:#312e81;
+    color:#c7d2fe;
+}
+
+.status-done{
+    background:#14532d;
+    color:#bbf7d0;
+}
+
+.status-late{
+    background:#7f1d1d;
+    color:#fecaca;
+}
+
+.priority-low{
+    color:#86efac;
+}
+
+.priority-medium{
+    color:#fde68a;
+}
+
+.priority-high{
+    color:#fdba74;
+}
+
+.priority-urgent{
+    color:#fca5a5;
+    font-weight:700;
+}
+
+/* PROGRESS */
+
+.progress{
+    width:90px;
+    height:6px;
+    background:#303641;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.progress div{
+    height:100%;
+    background:var(--accent);
+}
+
+/* FILTERS */
+
+.filters{
+    display:flex;
+    gap:9px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+}
+
+.search,
+.filter-select{
+    background:#171a20;
+    border:1px solid var(--border);
+    color:white;
+    padding:10px 12px;
+    border-radius:8px;
+}
+
+.search{
+    flex:1;
+    min-width:220px;
+}
+
+/* COURSES */
+
+.course-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:15px;
+}
+
+.course-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px;
+    position:relative;
+}
+
+.course-line{
+    height:5px;
+    border-radius:5px;
+    margin-bottom:15px;
+}
+
+.course-card h3{
+    margin:0 0 5px;
+}
+
+.course-meta{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:5px;
+}
+
+.course-actions{
+    display:flex;
+    gap:6px;
+    margin-top:15px;
+}
+
+/* EMPTY */
+
+.empty{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--muted);
+}
+
+.empty-icon{
+    font-size:40px;
+    margin-bottom:10px;
+}
+
+/* CALENDAR */
+
+.calendar-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.calendar-item{
+    display:grid;
+    grid-template-columns:75px 1fr auto;
+    gap:15px;
+    align-items:center;
+    padding:14px;
+    background:var(--card2);
+    border-radius:9px;
+}
+
+.date-box{
+    text-align:center;
+    border-right:1px solid var(--border);
+}
+
+.date-day{
+    font-size:23px;
+    font-weight:800;
+}
+
+.date-month{
+    color:var(--muted);
+    font-size:12px;
+    text-transform:uppercase;
+}
+
+/* MODALS */
+
+dialog{
+    border:1px solid var(--border);
+    background:#171a20;
+    color:white;
+    border-radius:14px;
+    padding:0;
+    width:min(720px,94vw);
+    max-height:90vh;
+    overflow:auto;
+    box-shadow:0 25px 80px rgba(0,0,0,.55);
+}
+
+dialog::backdrop{
+    background:rgba(0,0,0,.72);
+}
+
+.modal-head{
+    padding:18px 22px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:sticky;
+    top:0;
+    background:#171a20;
+    z-index:2;
+}
+
+.modal-head h2{
+    margin:0;
+    font-size:19px;
+}
+
+.modal-body{
+    padding:22px;
+}
+
+.modal-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:9px;
+    padding:16px 22px;
+    border-top:1px solid var(--border);
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.form-group.full{
+    grid-column:1/-1;
+}
+
+label{
+    font-size:13px;
+    color:#d1d5db;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    background:#111419;
+    color:white;
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 11px;
+    outline:none;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+    border-color:var(--accent);
+}
+
+textarea{
+    resize:vertical;
+    min-height:90px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:950px){
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:700px){
+    .app{
+        display:block;
+    }
+
+    .sidebar{
+        position:static;
+        width:100%;
+        height:auto;
+    }
+
+    .nav{
+        flex-direction:row;
+        overflow:auto;
+    }
+
+    .nav button{
+        white-space:nowrap;
+    }
+
+    .main{
+        padding:20px 15px;
+    }
+
+    .topbar{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .form-group.full{
+        grid-column:auto;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+
+    <div class="brand">🎓 Uni<span>Task</span></div>
+
+    <nav class="nav">
+        <button class="active" data-view="dashboard">🏠 Dashboard</button>
+        <button data-view="tasks">📋 Mis tareas</button>
+        <button data-view="calendar">📅 Calendario</button>
+        <button data-view="courses">📚 Cursos</button>
+        <button data-view="completed">✅ Completadas</button>
+    </nav>
+
+    <div class="sidebar-bottom">
+        <button class="btn" style="width:100%;margin-bottom:8px" onclick="exportData()">
+            ⬇ Exportar respaldo
+        </button>
+
+        <button class="btn" style="width:100%" onclick="document.getElementById('importFile').click()">
+            ⬆ Importar respaldo
+        </button>
+
+        <input
+            type="file"
+            id="importFile"
+            accept=".json"
+            hidden
+            onchange="importData(event)"
+        >
+    </div>
+
+</aside>
+
+<main class="main">
+
+    <div class="topbar">
+
+        <div>
+            <h1 id="pageTitle">Dashboard</h1>
+            <div class="subtitle" id="pageSubtitle">
+                Resumen de tus actividades universitarias.
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn" id="newCourseTop" onclick="openCourseModal()">
+                + Curso
+            </button>
+
+            <button class="btn primary" onclick="openTaskModal()">
+                + Nueva tarea
+            </button>
+        </div>
+
+    </div>
+
+    <div id="content"></div>
+
+</main>
+</div>
+
+<!-- ===================================================== -->
+<!-- MODAL TAREA -->
+<!-- ===================================================== -->
+
+<dialog id="taskDialog">
+
+<form id="taskForm">
+
+    <div class="modal-head">
+        <h2 id="taskModalTitle">Nueva tarea</h2>
+
+        <button
+            type="button"
+            class="icon-btn"
+            onclick="closeTaskModal()"
+            aria-label="Cerrar">
+            ✕
+        </button>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="form-grid">
+
+            <div class="form-group full">
+                <label>Nombre de la tarea *</label>
+                <input id="taskName" required placeholder="Ej. Avance del proyecto">
+            </div>
+
+            <div class="form-group">
+                <label>Curso *</label>
+                <select id="taskCourse" required></select>
+            </div>
+
+            <div class="form-group">
+                <label>Tipo de actividad</label>
+                <select id="taskType">
+                    <option>Tarea</option>
+                    <option>Proyecto</option>
+                    <option>Examen</option>
+                    <option>Quiz</option>
+                    <option>Exposición</option>
+                    <option>Laboratorio</option>
+                    <option>Lectura</option>
+                    <option>Investigación</option>
+                    <option>Reunión</option>
+                    <option>Otro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Estado</label>
+                <select id="taskStatus">
+                    <option value="No iniciada">No iniciada</option>
+                    <option value="En proceso">En proceso</option>
+                    <option value="Completada">Completada</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Prioridad</label>
+                <select id="taskPriority">
+                    <option value="Baja">Baja</option>
+                    <option value="Media" selected>Media</option>
+                    <option value="Alta">Alta</option>
+                    <option value="Urgente">Urgente</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Fecha de entrega</label>
+                <input type="date" id="taskDate">
+            </div>
+
+            <div class="form-group">
+                <label>Hora</label>
+                <input type="time" id="taskTime">
+            </div>
+
+            <div class="form-group">
+                <label>Modalidad</label>
+                <select id="taskMode">
+                    <option>Individual</option>
+                    <option>Grupal</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Progreso (%)</label>
+                <input
+                    type="number"
+                    id="taskProgress"
+                    min="0"
+                    max="100"
+                    value="0"
+                >
+            </div>
+
+            <div class="form-group full">
+                <label>Responsables</label>
+                <input
+                    id="taskResponsible"
+                    placeholder="Ej. Cristian, Andrea, Hilary"
+                >
+            </div>
+
+            <div class="form-group full">
+                <label>Enlace</label>
+                <input
+                    type="url"
+                    id="taskLink"
+                    placeholder="https://..."
+                >
+            </div>
+
+            <div class="form-group full">
+                <label>Descripción / notas</label>
+                <textarea
+                    id="taskNotes"
+                    placeholder="Indicaciones, entregables, observaciones..."
+                ></textarea>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-footer">
+
+        <button
+            type="button"
+            class="btn"
+            onclick="closeTaskModal()">
+            Cancelar
+        </button>
+
+        <button
+            type="submit"
+            class="btn primary">
+            Guardar tarea
+        </button>
+
+    </div>
+
+</form>
+</dialog>
+
+<!-- ===================================================== -->
+<!-- MODAL CURSO -->
+<!-- ===================================================== -->
+
+<dialog id="courseDialog">
+
+<form id="courseForm">
+
+    <div class="modal-head">
+
+        <h2 id="courseModalTitle">Nuevo curso</h2>
+
+        <button
+            type="button"
+            class="icon-btn"
+            onclick="closeCourseModal()">
+            ✕
+        </button>
+
+    </div>
+
+    <div class="modal-body">
+
+        <div class="form-grid">
+
+            <div class="form-group full">
+                <label>Nombre del curso *</label>
+                <input
+                    id="courseName"
+                    required
+                    placeholder="Ej. Auditoría de TI"
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Código / Grupo</label>
+                <input
+                    id="courseCode"
+                    placeholder="Ej. TI-9805 GR 1"
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Profesor</label>
+                <input
+                    id="courseProfessor"
+                    placeholder="Nombre del profesor"
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Horario</label>
+                <input
+                    id="courseSchedule"
+                    placeholder="Ej. Martes 5:00 p. m."
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Aula</label>
+                <input
+                    id="courseRoom"
+                    placeholder="Ej. F2-04"
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Color</label>
+                <input
+                    type="color"
+                    id="courseColor"
+                    value="#7c6df2"
+                >
+            </div>
+
+            <div class="form-group full">
+                <label>Notas</label>
+                <textarea
+                    id="courseNotes"
+                    placeholder="Información importante del curso..."
+                ></textarea>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+        <button
+            type="button"
+            class="btn"
+            onclick="closeCourseModal()">
+            Cancelar
+        </button>
+
+        <button
+            type="submit"
+            class="btn primary">
+            Guardar curso
+        </button>
+
+    </div>
+
+</form>
+</dialog>
+
+<script>
+
+/* =========================================================
+   ALMACENAMIENTO
+========================================================= */
+
+const TASK_KEY = "unitask_tasks_v1";
+const COURSE_KEY = "unitask_courses_v1";
+
+let tasks = JSON.parse(localStorage.getItem(TASK_KEY) || "[]");
+let courses = JSON.parse(localStorage.getItem(COURSE_KEY) || "[]");
+
+let currentView = "dashboard";
+let editingTaskId = null;
+let editingCourseId = null;
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
+function id(){
+    return Date.now().toString(36) +
+           Math.random().toString(36).substring(2);
+}
+
+function escapeHTML(value=""){
+    return String(value)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+}
+
+function save(){
+    localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
+    localStorage.setItem(COURSE_KEY, JSON.stringify(courses));
+}
+
+function formatDate(date){
+
+    if(!date) return "Sin fecha";
+
+    const d = new Date(date + "T12:00:00");
+
+    return d.toLocaleDateString("es-CR",{
+        day:"2-digit",
+        month:"short",
+        year:"numeric"
+    });
+}
+
+function isLate(task){
+
+    if(
+        !task.date ||
+        task.status === "Completada"
+    ){
+        return false;
+    }
+
+    const deadline =
+        new Date(
+            task.date +
+            "T" +
+            (task.time || "23:59")
+        );
+
+    return deadline < new Date();
+}
+
+function statusClass(task){
+
+    if(isLate(task)){
+        return "status-late";
+    }
+
+    if(task.status === "Completada"){
+        return "status-done";
+    }
+
+    if(task.status === "En proceso"){
+        return "status-progress";
+    }
+
+    return "status-no";
+}
+
+function statusText(task){
+
+    if(isLate(task)){
+        return "Atrasada";
+    }
+
+    return task.status;
+}
+
+function priorityClass(priority){
+
+    const map = {
+        "Baja":"priority-low",
+        "Media":"priority-medium",
+        "Alta":"priority-high",
+        "Urgente":"priority-urgent"
+    };
+
+    return map[priority] || "";
+}
+
+function getCourse(courseId){
+
+    return courses.find(c => c.id === courseId);
+}
+
+function courseName(task){
+
+    const course = getCourse(task.courseId);
+
+    return course
+        ? course.name
+        : task.course || "Sin curso";
+}
+
+/* =========================================================
+   MIGRACIÓN AUTOMÁTICA
+   Convierte cursos antiguos escritos dentro de tareas
+   en cursos independientes.
+========================================================= */
+
+function migrateOldCourses(){
+
+    let changed = false;
+
+    tasks.forEach(task => {
+
+        if(task.courseId){
+            return;
+        }
+
+        const oldName =
+            (task.course || "").trim();
+
+        if(!oldName){
+            return;
+        }
+
+        let course = courses.find(
+            c => c.name.toLowerCase() === oldName.toLowerCase()
+        );
+
+        if(!course){
+
+            course = {
+                id:id(),
+                name:oldName,
+                code:"",
+                professor:"",
+                schedule:"",
+                room:"",
+                color:"#7c6df2",
+                notes:""
+            };
+
+            courses.push(course);
+            changed = true;
+        }
+
+        task.courseId = course.id;
+        changed = true;
+    });
+
+    if(changed){
+        save();
+    }
+}
+
+migrateOldCourses();
+
+/* =========================================================
+   NAVEGACIÓN
+========================================================= */
+
+document.querySelectorAll("[data-view]").forEach(button => {
+
+    button.addEventListener("click",()=>{
+
+        document
+            .querySelectorAll("[data-view]")
+            .forEach(b => b.classList.remove("active"));
+
+        button.classList.add("active");
+
+        currentView = button.dataset.view;
+
+        render();
+    });
+
+});
+
+/* =========================================================
+   RENDER GENERAL
+========================================================= */
+
+function render(){
+
+    const content =
+        document.getElementById("content");
+
+    const title =
+        document.getElementById("pageTitle");
+
+    const subtitle =
+        document.getElementById("pageSubtitle");
+
+    if(currentView === "dashboard"){
+
+        title.textContent = "Dashboard";
+
+        subtitle.textContent =
+            "Resumen de tus actividades universitarias.";
+
+        content.innerHTML = renderDashboard();
+    }
+
+    else if(currentView === "tasks"){
+
+        title.textContent = "Mis tareas";
+
+        subtitle.textContent =
+            "Gestioná todas tus actividades.";
+
+        content.innerHTML = renderTasks();
+    }
+
+    else if(currentView === "calendar"){
+
+        title.textContent = "Calendario";
+
+        subtitle.textContent =
+            "Próximas fechas de entrega.";
+
+        content.innerHTML = renderCalendar();
+    }
+
+    else if(currentView === "courses"){
+
+        title.textContent = "Cursos";
+
+        subtitle.textContent =
+            "Administrá los cursos del semestre.";
+
+        content.innerHTML = renderCourses();
+    }
+
+    else if(currentView === "completed"){
+
+        title.textContent = "Completadas";
+
+        subtitle.textContent =
+            "Historial de actividades terminadas.";
+
+        content.innerHTML =
+            renderTaskTable(
+                tasks.filter(t => t.status === "Completada")
+            );
+    }
+}
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+function renderDashboard(){
+
+    const pending =
+        tasks.filter(
+            t => t.status !== "Completada"
+        );
+
+    const progress =
+        tasks.filter(
+            t => t.status === "En proceso"
+        );
+
+    const completed =
+        tasks.filter(
+            t => t.status === "Completada"
+        );
+
+    const late =
+        tasks.filter(isLate);
+
+    const upcoming =
+        pending
+            .filter(t => t.date)
+            .sort(
+                (a,b) =>
+                new Date(a.date) -
+                new Date(b.date)
+            )
+            .slice(0,7);
+
+    return `
+
+    <div class="stats">
+
+        <div class="stat">
+            <div class="stat-label">
+                Pendientes
+            </div>
+            <div class="stat-value">
+                ${pending.length}
+            </div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">
+                En proceso
+            </div>
+            <div class="stat-value">
+                ${progress.length}
+            </div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">
+                Completadas
+            </div>
+            <div class="stat-value">
+                ${completed.length}
+            </div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-label">
+                Atrasadas
+            </div>
+            <div class="stat-value">
+                ${late.length}
+            </div>
+        </div>
+
+    </div>
+
+    <div class="grid">
+
+        <section class="panel">
+
+            <div class="panel-title">
+                <h2>Próximas entregas</h2>
+
+                <button
+                    class="btn small"
+                    onclick="goToView('tasks')">
+                    Ver todas
+                </button>
+            </div>
+
+            ${
+                upcoming.length
+                ? renderTaskTable(upcoming)
+                : emptyState(
+                    "📚",
+                    "No hay entregas pendientes."
+                )
+            }
+
+        </section>
+
+        <section class="panel">
+
+            <div class="panel-title">
+                <h2>Cursos</h2>
+
+                <button
+                    class="btn small"
+                    onclick="openCourseModal()">
+                    + Agregar
+                </button>
+            </div>
+
+            ${
+                courses.length
+                ? courses.map(course => {
+
+                    const count =
+                        tasks.filter(
+                            t =>
+                            t.courseId === course.id &&
+                            t.status !== "Completada"
+                        ).length;
+
+                    return `
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        gap:10px;
+                        padding:10px 0;
+                        border-bottom:1px solid var(--border)
+                    ">
+
+                        <span style="
+                            width:10px;
+                            height:10px;
+                            border-radius:50%;
+                            background:${course.color}
+                        "></span>
+
+                        <div style="flex:1">
+                            ${escapeHTML(course.name)}
+                        </div>
+
+                        <span class="muted">
+                            ${count}
+                        </span>
+
+                    </div>
+                    `;
+
+                }).join("")
+                : emptyState(
+                    "📘",
+                    "Todavía no hay cursos."
+                )
+            }
+
+        </section>
+
+    </div>
+    `;
+}
+
+function goToView(view){
+
+    currentView = view;
+
+    document
+        .querySelectorAll("[data-view]")
+        .forEach(button => {
+
+            button.classList.toggle(
+                "active",
+                button.dataset.view === view
+            );
+
+        });
+
+    render();
+}
+
+/* =========================================================
+   TAREAS
+========================================================= */
+
+function renderTasks(){
+
+    return `
+
+    <div class="filters">
+
+        <input
+            class="search"
+            id="searchTasks"
+            placeholder="🔎 Buscar tarea..."
+            oninput="filterTasks()"
+        >
+
+        <select
+            class="filter-select"
+            id="filterCourse"
+            onchange="filterTasks()">
+
+            <option value="">
+                Todos los cursos
+            </option>
+
+            ${courses.map(c => `
+                <option value="${c.id}">
+                    ${escapeHTML(c.name)}
+                </option>
+            `).join("")}
+
+        </select>
+
+        <select
+            class="filter-select"
+            id="filterStatus"
+            onchange="filterTasks()">
+
+            <option value="">
+                Todos los estados
+            </option>
+
+            <option>No iniciada</option>
+            <option>En proceso</option>
+            <option>Completada</option>
+
+        </select>
+
+        <select
+            class="filter-select"
+            id="filterPriority"
+            onchange="filterTasks()">
+
+            <option value="">
+                Todas las prioridades
+            </option>
+
+            <option>Baja</option>
+            <option>Media</option>
+            <option>Alta</option>
+            <option>Urgente</option>
+
+        </select>
+
+    </div>
+
+    <div id="taskListContainer">
+        ${renderTaskTable(tasks)}
+    </div>
+    `;
+}
+
+function filterTasks(){
+
+    const text =
+        document
+            .getElementById("searchTasks")
+            .value
+            .toLowerCase();
+
+    const course =
+        document
+            .getElementById("filterCourse")
+            .value;
+
+    const status =
+        document
+            .getElementById("filterStatus")
+            .value;
+
+    const priority =
+        document
+            .getElementById("filterPriority")
+            .value;
+
+    const filtered =
+        tasks.filter(task => {
+
+            const searchText =
+                (
+                    task.name +
+                    " " +
+                    courseName(task) +
+                    " " +
+                    (task.responsible || "")
+                ).toLowerCase();
+
+            return (
+                searchText.includes(text) &&
+                (!course || task.courseId === course) &&
+                (!status || task.status === status) &&
+                (!priority || task.priority === priority)
+            );
+        });
+
+    document
+        .getElementById("taskListContainer")
+        .innerHTML =
+        renderTaskTable(filtered);
+}
+
+function renderTaskTable(list){
+
+    if(!list.length){
+
+        return emptyState(
+            "📝",
+            "No hay tareas para mostrar."
+        );
+    }
+
+    return `
+
+    <div class="table-wrap">
+
+    <table>
+
+        <thead>
+        <tr>
+            <th>Tarea</th>
+            <th>Curso</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Entrega</th>
+            <th>Progreso</th>
+            <th></th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        ${list.map(task => `
+
+            <tr>
+
+                <td>
+                    <div class="task-title">
+                        ${escapeHTML(task.name)}
+                    </div>
+
+                    ${
+                        task.responsible
+                        ? `
+                        <div class="muted"
+                             style="font-size:12px;margin-top:3px">
+                            ${escapeHTML(task.responsible)}
+                        </div>
+                        `
+                        : ""
+                    }
+                </td>
+
+                <td>
+                    ${escapeHTML(courseName(task))}
+                </td>
+
+                <td>
+                    ${escapeHTML(task.type || "Tarea")}
+                </td>
+
+                <td>
+                    <span class="badge ${statusClass(task)}">
+                        ${statusText(task)}
+                    </span>
+                </td>
+
+                <td class="${priorityClass(task.priority)}">
+                    ${escapeHTML(task.priority || "Media")}
+                </td>
+
+                <td>
+                    ${formatDate(task.date)}
+
+                    ${
+                        task.time
+                        ? `<div class="muted"
+                             style="font-size:12px">
+                             ${task.time}
+                           </div>`
+                        : ""
+                    }
+                </td>
+
+                <td>
+
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        gap:7px
+                    ">
+
+                        <div class="progress">
+                            <div style="
+                                width:${Number(task.progress || 0)}%
+                            "></div>
+                        </div>
+
+                        <span class="muted">
+                            ${Number(task.progress || 0)}%
+                        </span>
+
+                    </div>
+
+                </td>
+
+                <td>
+
+                    <button
+                        class="icon-btn"
+                        onclick="editTask('${task.id}')"
+                        title="Editar">
+                        ✎
+                    </button>
+
+                    <button
+                        class="icon-btn"
+                        onclick="deleteTask('${task.id}')"
+                        title="Eliminar">
+                        🗑
+                    </button>
+
+                </td>
+
+            </tr>
+
+        `).join("")}
+
+        </tbody>
+
+    </table>
+
+    </div>
+    `;
+}
+
+/* =========================================================
+   MODAL TAREA
+========================================================= */
+
+function refreshCourseSelect(){
+
+    const select =
+        document.getElementById("taskCourse");
+
+    select.innerHTML = `
+
+        <option value="">
+            Seleccioná un curso
+        </option>
+
+        ${courses.map(course => `
+            <option value="${course.id}">
+                ${escapeHTML(course.name)}
+                ${course.code
+                    ? " — " + escapeHTML(course.code)
+                    : ""
+                }
+            </option>
+        `).join("")}
+    `;
+}
+
+function openTaskModal(task=null){
+
+    if(!courses.length){
+
+        alert(
+            "Primero agregá al menos un curso antes de crear una tarea."
+        );
+
+        openCourseModal();
+
+        return;
+    }
+
+    const dialog =
+        document.getElementById("taskDialog");
+
+    const form =
+        document.getElementById("taskForm");
+
+    form.reset();
+
+    refreshCourseSelect();
+
+    editingTaskId =
+        task ? task.id : null;
+
+    document
+        .getElementById("taskModalTitle")
+        .textContent =
+        task
+        ? "Editar tarea"
+        : "Nueva tarea";
+
+    if(task){
+
+        taskName.value =
+            task.name || "";
+
+        taskCourse.value =
+            task.courseId || "";
+
+        taskType.value =
+            task.type || "Tarea";
+
+        taskStatus.value =
+            task.status || "No iniciada";
+
+        taskPriority.value =
+            task.priority || "Media";
+
+        taskDate.value =
+            task.date || "";
+
+        taskTime.value =
+            task.time || "";
+
+        taskMode.value =
+            task.mode || "Individual";
+
+        taskProgress.value =
+            task.progress ?? 0;
+
+        taskResponsible.value =
+            task.responsible || "";
+
+        taskLink.value =
+            task.link || "";
+
+        taskNotes.value =
+            task.notes || "";
+
+    }else{
+
+        taskStatus.value =
+            "No iniciada";
+
+        taskPriority.value =
+            "Media";
+
+        taskProgress.value =
+            0;
+    }
+
+    dialog.showModal();
+}
+
+function closeTaskModal(){
+
+    document
+        .getElementById("taskForm")
+        .reset();
+
+    editingTaskId = null;
+
+    document
+        .getElementById("taskDialog")
+        .close();
+}
+
+document
+    .getElementById("taskForm")
+    .addEventListener(
+        "submit",
+        event => {
+
+            event.preventDefault();
+
+            const selectedCourse =
+                getCourse(taskCourse.value);
+
+            if(!selectedCourse){
+
+                alert(
+                    "Seleccioná un curso."
+                );
+
+                return;
+            }
+
+            const data = {
+
+                id:
+                    editingTaskId || id(),
+
+                name:
+                    taskName.value.trim(),
+
+                courseId:
+                    taskCourse.value,
+
+                /* Se conserva el nombre para
+                   compatibilidad con versiones antiguas */
+                course:
+                    selectedCourse.name,
+
+                type:
+                    taskType.value,
+
+                status:
+                    taskStatus.value,
+
+                priority:
+                    taskPriority.value,
+
+                date:
+                    taskDate.value,
+
+                time:
+                    taskTime.value,
+
+                mode:
+                    taskMode.value,
+
+                progress:
+                    Number(taskProgress.value || 0),
+
+                responsible:
+                    taskResponsible.value.trim(),
+
+                link:
+                    taskLink.value.trim(),
+
+                notes:
+                    taskNotes.value.trim()
+            };
+
+            if(data.status === "Completada"){
+                data.progress = 100;
+            }
+
+            if(editingTaskId){
+
+                const index =
+                    tasks.findIndex(
+                        t => t.id === editingTaskId
+                    );
+
+                tasks[index] = data;
+
+            }else{
+
+                tasks.push(data);
+            }
+
+            save();
+
+            document
+                .getElementById("taskDialog")
+                .close();
+
+            editingTaskId = null;
+
+            render();
+        }
+    );
+
+function editTask(taskId){
+
+    const task =
+        tasks.find(
+            t => t.id === taskId
+        );
+
+    if(task){
+        openTaskModal(task);
+    }
+}
+
+function deleteTask(taskId){
+
+    const task =
+        tasks.find(
+            t => t.id === taskId
+        );
+
+    if(!task){
+        return;
+    }
+
+    if(
+        confirm(
+            `¿Eliminar la tarea "${task.name}"?`
+        )
+    ){
+
+        tasks =
+            tasks.filter(
+                t => t.id !== taskId
+            );
+
+        save();
+
+        render();
+    }
+}
+
+/* =========================================================
+   CURSOS
+========================================================= */
+
+function renderCourses(){
+
+    if(!courses.length){
+
+        return `
+        <div class="panel">
+
+            ${emptyState(
+                "📚",
+                "Todavía no hay cursos registrados."
+            )}
+
+            <div style="text-align:center">
+
+                <button
+                    class="btn primary"
+                    onclick="openCourseModal()">
+                    + Agregar primer curso
+                </button>
+
+            </div>
+
+        </div>
+        `;
+    }
+
+    return `
+
+    <div class="course-grid">
+
+        ${courses.map(course => {
+
+            const total =
+                tasks.filter(
+                    t => t.courseId === course.id
+                ).length;
+
+            const pending =
+                tasks.filter(
+                    t =>
+                    t.courseId === course.id &&
+                    t.status !== "Completada"
+                ).length;
+
+            return `
+
+            <div class="course-card">
+
+                <div
+                    class="course-line"
+                    style="background:${course.color}">
+                </div>
+
+                <h3>
+                    ${escapeHTML(course.name)}
+                </h3>
+
+                ${
+                    course.code
+                    ? `
+                    <div class="course-meta">
+                        🏷 ${escapeHTML(course.code)}
+                    </div>
+                    `
+                    : ""
+                }
+
+                ${
+                    course.professor
+                    ? `
+                    <div class="course-meta">
+                        👨‍🏫 ${escapeHTML(course.professor)}
+                    </div>
+                    `
+                    : ""
+                }
+
+                ${
+                    course.schedule
+                    ? `
+                    <div class="course-meta">
+                        🕐 ${escapeHTML(course.schedule)}
+                    </div>
+                    `
+                    : ""
+                }
+
+                ${
+                    course.room
+                    ? `
+                    <div class="course-meta">
+                        📍 ${escapeHTML(course.room)}
+                    </div>
+                    `
+                    : ""
+                }
+
+                <div class="course-meta"
+                     style="margin-top:12px">
+
+                    ${total} tareas ·
+                    ${pending} pendientes
+
+                </div>
+
+                ${
+                    course.notes
+                    ? `
+                    <div class="course-meta"
+                         style="margin-top:10px">
+                        ${escapeHTML(course.notes)}
+                    </div>
+                    `
+                    : ""
+                }
+
+                <div class="course-actions">
+
+                    <button
+                        class="btn small"
+                        onclick="editCourse('${course.id}')">
+                        Editar
+                    </button>
+
+                    <button
+                        class="btn small danger"
+                        onclick="deleteCourse('${course.id}')">
+                        Eliminar
+                    </button>
+
+                </div>
+
+            </div>
+            `;
+
+        }).join("")}
+
+    </div>
+    `;
+}
+
+/* =========================================================
+   MODAL CURSO
+========================================================= */
+
+function openCourseModal(course=null){
+
+    const form =
+        document.getElementById("courseForm");
+
+    form.reset();
+
+    editingCourseId =
+        course ? course.id : null;
+
+    document
+        .getElementById("courseModalTitle")
+        .textContent =
+        course
+        ? "Editar curso"
+        : "Nuevo curso";
+
+    courseColor.value =
+        "#7c6df2";
+
+    if(course){
+
+        courseName.value =
+            course.name || "";
+
+        courseCode.value =
+            course.code || "";
+
+        courseProfessor.value =
+            course.professor || "";
+
+        courseSchedule.value =
+            course.schedule || "";
+
+        courseRoom.value =
+            course.room || "";
+
+        courseColor.value =
+            course.color || "#7c6df2";
+
+        courseNotes.value =
+            course.notes || "";
+    }
+
+    document
+        .getElementById("courseDialog")
+        .showModal();
+}
+
+function closeCourseModal(){
+
+    document
+        .getElementById("courseForm")
+        .reset();
+
+    editingCourseId = null;
+
+    document
+        .getElementById("courseDialog")
+        .close();
+}
+
+document
+    .getElementById("courseForm")
+    .addEventListener(
+        "submit",
+        event => {
+
+            event.preventDefault();
+
+            const name =
+                courseName.value.trim();
+
+            const duplicate =
+                courses.find(
+                    c =>
+                    c.name.toLowerCase() ===
+                    name.toLowerCase() &&
+                    c.id !== editingCourseId
+                );
+
+            if(duplicate){
+
+                alert(
+                    "Ya existe un curso con ese nombre."
+                );
+
+                return;
+            }
+
+            const data = {
+
+                id:
+                    editingCourseId || id(),
+
+                name:name,
+
+                code:
+                    courseCode.value.trim(),
+
+                professor:
+                    courseProfessor.value.trim(),
+
+                schedule:
+                    courseSchedule.value.trim(),
+
+                room:
+                    courseRoom.value.trim(),
+
+                color:
+                    courseColor.value,
+
+                notes:
+                    courseNotes.value.trim()
+            };
+
+            if(editingCourseId){
+
+                const index =
+                    courses.findIndex(
+                        c => c.id === editingCourseId
+                    );
+
+                courses[index] = data;
+
+                /* Actualiza también el nombre
+                   almacenado en tareas antiguas */
+                tasks.forEach(task => {
+
+                    if(
+                        task.courseId ===
+                        editingCourseId
+                    ){
+                        task.course = data.name;
+                    }
+
+                });
+
+            }else{
+
+                courses.push(data);
+            }
+
+            save();
+
+            document
+                .getElementById("courseDialog")
+                .close();
+
+            editingCourseId = null;
+
+            render();
+        }
+    );
+
+function editCourse(courseId){
+
+    const course =
+        courses.find(
+            c => c.id === courseId
+        );
+
+    if(course){
+        openCourseModal(course);
+    }
+}
+
+function deleteCourse(courseId){
+
+    const course =
+        courses.find(
+            c => c.id === courseId
+        );
+
+    if(!course){
+        return;
+    }
+
+    const related =
+        tasks.filter(
+            t => t.courseId === courseId
+        );
+
+    if(related.length){
+
+        alert(
+            `No se puede eliminar "${course.name}" porque tiene ${related.length} tarea(s) asociada(s).\n\nEliminá o cambiá esas tareas primero.`
+        );
+
+        return;
+    }
+
+    if(
+        confirm(
+            `¿Eliminar el curso "${course.name}"?`
+        )
+    ){
+
+        courses =
+            courses.filter(
+                c => c.id !== courseId
+            );
+
+        save();
+
+        render();
+    }
+}
+
+/* =========================================================
+   CALENDARIO
+========================================================= */
+
+function renderCalendar(){
+
+    const dated =
+        tasks
+            .filter(t => t.date)
+            .sort(
+                (a,b) =>
+                new Date(a.date) -
+                new Date(b.date)
+            );
+
+    if(!dated.length){
+
+        return `
+        <div class="panel">
+            ${emptyState(
+                "📅",
+                "No hay actividades con fecha."
+            )}
+        </div>
+        `;
+    }
+
+    return `
+
+    <div class="panel">
+
+        <div class="calendar-list">
+
+        ${dated.map(task => {
+
+            const d =
+                new Date(
+                    task.date + "T12:00:00"
+                );
+
+            const month =
+                d.toLocaleDateString(
+                    "es-CR",
+                    {month:"short"}
+                );
+
+            return `
+
+            <div class="calendar-item">
+
+                <div class="date-box">
+
+                    <div class="date-day">
+                        ${d.getDate()}
+                    </div>
+
+                    <div class="date-month">
+                        ${month}
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <div class="task-title">
+                        ${escapeHTML(task.name)}
+                    </div>
+
+                    <div class="muted"
+                         style="margin-top:4px">
+
+                        ${escapeHTML(courseName(task))}
+                        ·
+                        ${escapeHTML(task.type || "Tarea")}
+
+                        ${
+                            task.time
+                            ? " · " + task.time
+                            : ""
+                        }
+
+                    </div>
+
+                </div>
+
+                <span class="badge ${statusClass(task)}">
+                    ${statusText(task)}
+                </span>
+
+            </div>
+            `;
+
+        }).join("")}
+
+        </div>
+
+    </div>
+    `;
+}
+
+/* =========================================================
+   ESTADO VACÍO
+========================================================= */
+
+function emptyState(icon,text){
+
+    return `
+
+    <div class="empty">
+
+        <div class="empty-icon">
+            ${icon}
+        </div>
+
+        <div>
+            ${text}
+        </div>
+
+    </div>
+    `;
+}
+
+/* =========================================================
+   CIERRE SEGURO DE MODALES
+========================================================= */
+
+/*
+   X:
+   cierra sin guardar.
+
+   Cancelar:
+   cierra sin guardar.
+
+   ESC:
+   cierra sin guardar.
+
+   Clic fuera:
+   cierra sin guardar.
+*/
+
+function configureDialog(dialog, closeFunction){
+
+    dialog.addEventListener(
+        "cancel",
+        event => {
+
+            event.preventDefault();
+
+            closeFunction();
+        }
+    );
+
+    dialog.addEventListener(
+        "click",
+        event => {
+
+            if(event.target !== dialog){
+                return;
+            }
+
+            const rect =
+                dialog.getBoundingClientRect();
+
+            const inside =
+                event.clientX >= rect.left &&
+                event.clientX <= rect.right &&
+                event.clientY >= rect.top &&
+                event.clientY <= rect.bottom;
+
+            if(!inside){
+                closeFunction();
+            }
+        }
+    );
+}
+
+configureDialog(
+    document.getElementById("taskDialog"),
+    closeTaskModal
+);
+
+configureDialog(
+    document.getElementById("courseDialog"),
+    closeCourseModal
+);
+
+/* =========================================================
+   EXPORTAR RESPALDO
+========================================================= */
+
+function exportData(){
+
+    const backup = {
+
+        app:"UniTask",
+
+        version:3,
+
+        exportedAt:
+            new Date().toISOString(),
+
+        courses:courses,
+
+        tasks:tasks
+    };
+
+    const blob =
+        new Blob(
+            [
+                JSON.stringify(
+                    backup,
+                    null,
+                    2
+                )
+            ],
+            {
+                type:"application/json"
+            }
+        );
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const a =
+        document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+        "UniTask_respaldo_" +
+        new Date()
+            .toISOString()
+            .slice(0,10) +
+        ".json";
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+/* =========================================================
+   IMPORTAR RESPALDO
+========================================================= */
+
+function importData(event){
+
+    const file =
+        event.target.files[0];
+
+    if(!file){
+        return;
+    }
+
+    const reader =
+        new FileReader();
+
+    reader.onload = e => {
+
+        try{
+
+            const data =
+                JSON.parse(e.target.result);
+
+            let importedTasks = [];
+            let importedCourses = [];
+
+            /*
+               Respaldo nuevo
+            */
+
+            if(
+                data &&
+                Array.isArray(data.tasks)
+            ){
+
+                importedTasks =
+                    data.tasks;
+
+                importedCourses =
+                    Array.isArray(data.courses)
+                    ? data.courses
+                    : [];
+
+            }
+
+            /*
+               Compatibilidad con respaldo
+               antiguo que era únicamente
+               un arreglo de tareas.
+            */
+
+            else if(Array.isArray(data)){
+
+                importedTasks =
+                    data;
+            }
+
+            else{
+
+                throw new Error(
+                    "Formato no reconocido"
+                );
+            }
+
+            if(
+                !confirm(
+                    "El respaldo reemplazará los datos actuales de este navegador. ¿Continuar?"
+                )
+            ){
+                return;
+            }
+
+            tasks =
+                importedTasks;
+
+            courses =
+                importedCourses;
+
+            save();
+
+            /*
+               Si el respaldo era antiguo,
+               genera los cursos desde
+               las tareas.
+            */
+
+            migrateOldCourses();
+
+            save();
+
+            render();
+
+            alert(
+                "Respaldo importado correctamente."
+            );
+
+        }catch(error){
+
+            alert(
+                "No se pudo importar el archivo. Verificá que sea un respaldo válido de UniTask."
+            );
+        }
+
+        event.target.value = "";
+    };
+
+    reader.readAsText(file);
+}
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+render();
+
+</script>
+
+</body>
+</html>
