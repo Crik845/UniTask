@@ -394,51 +394,173 @@ tr:hover td{
 
 .responsible-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
-    gap:15px;
+    grid-template-columns:repeat(auto-fill,minmax(310px,1fr));
+    gap:18px;
 }
 
 .responsible-card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:18px;
+    --resp-accent:var(--accent);
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(145deg,#1a1f28 0%,#151920 100%);
+    border:1px solid #303746;
+    border-radius:16px;
+    padding:20px;
+    box-shadow:0 10px 28px rgba(0,0,0,.16);
+    transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+
+.responsible-card::before{
+    content:"";
+    position:absolute;
+    inset:0 0 auto 0;
+    height:4px;
+    background:linear-gradient(90deg,var(--resp-accent),transparent);
+}
+
+.responsible-card:hover{
+    transform:translateY(-2px);
+    border-color:color-mix(in srgb,var(--resp-accent) 55%,#303746);
+    box-shadow:0 14px 34px rgba(0,0,0,.22);
 }
 
 .responsible-head{
     display:flex;
     align-items:center;
-    gap:12px;
+    gap:13px;
 }
 
 .responsible-avatar{
-    width:42px;
-    height:42px;
-    border-radius:50%;
+    width:48px;
+    height:48px;
+    border-radius:14px;
     display:grid;
     place-items:center;
-    background:#252a34;
-    border:1px solid var(--border);
-    font-weight:800;
-    color:#ddd8ff;
+    background:linear-gradient(135deg,var(--resp-accent),#332d58);
+    border:1px solid rgba(255,255,255,.10);
+    font-weight:900;
+    color:white;
+    letter-spacing:.4px;
     flex:0 0 auto;
+    box-shadow:0 7px 18px color-mix(in srgb,var(--resp-accent) 22%,transparent);
 }
 
 .responsible-name{
-    font-weight:700;
-    font-size:16px;
+    font-weight:800;
+    font-size:17px;
 }
 
 .responsible-meta{
     color:var(--muted);
-    font-size:13px;
+    font-size:12px;
     margin-top:4px;
+}
+
+.responsible-stats{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:15px;
+}
+
+.responsible-stat{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 9px;
+    border:1px solid var(--border);
+    border-radius:999px;
+    background:#12161d;
+    color:#cbd5e1;
+    font-size:12px;
+}
+
+.responsible-stat.pending{
+    border-color:color-mix(in srgb,var(--resp-accent) 45%,var(--border));
+    color:#f3f4f6;
 }
 
 .responsible-actions{
     display:flex;
-    gap:6px;
-    margin-top:15px;
+    gap:7px;
+    margin-top:16px;
+    flex-wrap:wrap;
+}
+
+.responsible-actions .pending-btn{
+    background:color-mix(in srgb,var(--resp-accent) 18%,#20242c);
+    border-color:color-mix(in srgb,var(--resp-accent) 45%,var(--border));
+}
+
+.responsible-actions .pending-btn:hover{
+    background:color-mix(in srgb,var(--resp-accent) 28%,#20242c);
+}
+
+.responsible-pending{
+    display:none;
+    margin-top:16px;
+    padding-top:15px;
+    border-top:1px solid var(--border);
+}
+
+.responsible-pending.open{
+    display:block;
+}
+
+.responsible-pending-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+    font-size:13px;
+    font-weight:800;
+}
+
+.pending-task-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.pending-task-item{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:10px;
+    align-items:center;
+    padding:10px 11px;
+    border:1px solid #2a3140;
+    border-left:3px solid var(--task-color,var(--resp-accent));
+    border-radius:10px;
+    background:#11151c;
+}
+
+.pending-task-item:hover{
+    background:#171c24;
+}
+
+.pending-task-name{
+    font-size:13px;
+    font-weight:700;
+}
+
+.pending-task-meta{
+    margin-top:4px;
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.35;
+}
+
+.pending-task-actions{
+    display:flex;
+    align-items:center;
+    gap:5px;
+}
+
+.pending-empty{
+    color:var(--muted);
+    font-size:13px;
+    padding:10px 0 2px;
 }
 
 /* EMPTY */
@@ -1367,6 +1489,27 @@ function ensureResponsiblesFromTasks(){
 function getResponsibleInitials(name=""){
     const parts = String(name).trim().split(/\s+/).filter(Boolean);
     return parts.slice(0,2).map(part => part[0]?.toUpperCase() || "").join("") || "R";
+}
+
+function getResponsibleColor(name=""){
+    const palette = [
+        "#7c6df2",
+        "#3b82f6",
+        "#14b8a6",
+        "#22c55e",
+        "#f59e0b",
+        "#f97316",
+        "#ec4899",
+        "#06b6d4"
+    ];
+
+    let hash = 0;
+    for(const char of String(name)){
+        hash = ((hash << 5) - hash) + char.charCodeAt(0);
+        hash |= 0;
+    }
+
+    return palette[Math.abs(hash) % palette.length];
 }
 
 /* =========================================================
@@ -2632,21 +2775,32 @@ function renderResponsibles(){
 
         ${ordered.map(responsible => {
 
-            const assigned =
+            const assignedTasks =
                 tasks.filter(
                     t => t.responsible === responsible.name
+                );
+
+            const pendingTasks =
+                assignedTasks
+                    .filter(t => t.status !== "Completada")
+                    .sort((a,b) => {
+                        if(!a.date && !b.date) return a.name.localeCompare(b.name, "es");
+                        if(!a.date) return 1;
+                        if(!b.date) return -1;
+                        return new Date(a.date + "T" + (a.time || "23:59")) -
+                               new Date(b.date + "T" + (b.time || "23:59"));
+                    });
+
+            const completed =
+                assignedTasks.filter(
+                    t => t.status === "Completada"
                 ).length;
 
-            const pending =
-                tasks.filter(
-                    t =>
-                    t.responsible === responsible.name &&
-                    t.status !== "Completada"
-                ).length;
+            const accent = getResponsibleColor(responsible.name);
 
             return `
 
-            <div class="responsible-card">
+            <div class="responsible-card" style="--resp-accent:${accent}">
 
                 <div class="responsible-head">
 
@@ -2654,19 +2808,38 @@ function renderResponsibles(){
                         ${escapeHTML(getResponsibleInitials(responsible.name))}
                     </div>
 
-                    <div>
+                    <div style="min-width:0">
                         <div class="responsible-name">
                             ${escapeHTML(responsible.name)}
                         </div>
 
                         <div class="responsible-meta">
-                            ${assigned} tarea(s) · ${pending} pendiente(s)
+                            Resumen de carga asignada
                         </div>
                     </div>
 
                 </div>
 
+                <div class="responsible-stats">
+                    <span class="responsible-stat">
+                        📋 ${assignedTasks.length} total
+                    </span>
+                    <span class="responsible-stat pending">
+                        ⏳ ${pendingTasks.length} pendiente(s)
+                    </span>
+                    <span class="responsible-stat">
+                        ✅ ${completed} completada(s)
+                    </span>
+                </div>
+
                 <div class="responsible-actions">
+
+                    <button
+                        class="btn small pending-btn"
+                        ${pendingTasks.length ? "" : "disabled"}
+                        onclick="toggleResponsiblePending('${responsible.id}', this)">
+                        ${pendingTasks.length ? `Ver pendientes (${pendingTasks.length})` : "Sin pendientes"}
+                    </button>
 
                     <button
                         class="btn small"
@@ -2682,6 +2855,55 @@ function renderResponsibles(){
 
                 </div>
 
+                <div class="responsible-pending" id="pending-${responsible.id}">
+
+                    <div class="responsible-pending-title">
+                        <span>📌 Pendientes de ${escapeHTML(responsible.name)}</span>
+                        <span class="muted">${pendingTasks.length}</span>
+                    </div>
+
+                    ${pendingTasks.length ? `
+                        <div class="pending-task-list">
+                            ${pendingTasks.map(task => {
+                                const course = getCourse(task.courseId);
+                                const courseColor = course?.color || accent;
+                                const delivery = task.date
+                                    ? `${formatDate(task.date)}${task.time ? " · " + escapeHTML(task.time) : ""}`
+                                    : "Sin fecha";
+
+                                return `
+                                <div class="pending-task-item" style="--task-color:${courseColor}">
+                                    <div style="min-width:0">
+                                        <div class="pending-task-name">
+                                            ${escapeHTML(task.name)}
+                                        </div>
+                                        <div class="pending-task-meta">
+                                            ${escapeHTML(getTaskCourseName(task))} · ${delivery}<br>
+                                            <span class="${priorityClass(task.priority)}">${escapeHTML(task.priority || "Media")}</span>
+                                            · ${escapeHTML(statusText(task))}
+                                        </div>
+                                    </div>
+
+                                    <div class="pending-task-actions">
+                                        <button
+                                            class="btn small"
+                                            onclick="editTask('${task.id}')"
+                                            title="Editar tarea">
+                                            Ver
+                                        </button>
+                                    </div>
+                                </div>
+                                `;
+                            }).join("")}
+                        </div>
+                    ` : `
+                        <div class="pending-empty">
+                            No hay tareas pendientes para esta persona.
+                        </div>
+                    `}
+
+                </div>
+
             </div>
             `;
 
@@ -2689,6 +2911,22 @@ function renderResponsibles(){
 
     </div>
     `;
+}
+
+function toggleResponsiblePending(responsibleId, button){
+    const panel = document.getElementById(`pending-${responsibleId}`);
+    if(!panel) return;
+
+    const opening = !panel.classList.contains("open");
+    panel.classList.toggle("open", opening);
+
+    if(button){
+        const responsible = responsibles.find(r => r.id === responsibleId);
+        const count = responsible
+            ? tasks.filter(t => t.responsible === responsible.name && t.status !== "Completada").length
+            : 0;
+        button.textContent = opening ? "Ocultar pendientes" : `Ver pendientes (${count})`;
+    }
 }
 
 function openResponsibleModal(responsible=null){
