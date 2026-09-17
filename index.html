@@ -704,6 +704,110 @@ textarea{
 /* CALENDARIO MENSUAL */
 .calendar-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px}.calendar-toolbar h2{margin:0;font-size:19px;text-transform:capitalize}.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(105px,1fr));border-top:1px solid var(--border);border-left:1px solid var(--border);min-width:760px}.calendar-weekday{padding:10px;text-align:center;color:var(--muted);font-size:12px;font-weight:700;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:#13171d}.calendar-day{min-height:125px;padding:8px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:#171a20}.calendar-day.other{opacity:.35}.calendar-day.today{outline:2px solid var(--accent);outline-offset:-2px}.calendar-number{font-size:12px;color:var(--muted);margin-bottom:7px}.calendar-task{display:block;width:100%;text-align:left;border:0;border-left:3px solid var(--accent);background:#222731;color:#fff;border-radius:5px;padding:6px 7px;margin:5px 0;font-size:11px;overflow:hidden}.calendar-task:hover{background:#2a303b}.calendar-task-title{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.calendar-task-meta{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}.calendar-scroll{overflow:auto}.calendar-detail{margin-top:16px}.calendar-detail h3{margin-top:0}
 
+/* SELECTOR DE MÚLTIPLES RESPONSABLES */
+.responsible-picker{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:9px;
+    background:#111419;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px;
+    max-height:220px;
+    overflow:auto;
+}
+
+.responsible-picker.empty-picker{
+    display:block;
+    color:var(--muted);
+    padding:14px;
+}
+
+.responsible-option{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:9px 10px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    background:#181c23;
+    cursor:pointer;
+    transition:.18s ease;
+    user-select:none;
+}
+
+.responsible-option:hover{
+    border-color:#4b5563;
+    background:#20242c;
+}
+
+.responsible-option.selected{
+    border-color:var(--resp-accent,#7c6df2);
+    box-shadow:0 0 0 1px color-mix(in srgb, var(--resp-accent,#7c6df2) 45%, transparent);
+    background:color-mix(in srgb, var(--resp-accent,#7c6df2) 12%, #181c23);
+}
+
+.responsible-option input{
+    width:16px;
+    height:16px;
+    margin:0;
+    accent-color:var(--resp-accent,#7c6df2);
+}
+
+.responsible-option-avatar{
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    flex:0 0 auto;
+    background:color-mix(in srgb, var(--resp-accent,#7c6df2) 20%, #20242c);
+    color:#fff;
+    font-size:12px;
+    font-weight:800;
+}
+
+.responsible-option-name{
+    font-size:13px;
+    font-weight:650;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.form-help{
+    color:var(--muted);
+    font-size:12px;
+}
+
+.task-responsibles{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin-top:5px;
+}
+
+.task-responsible-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:3px 7px;
+    border-radius:999px;
+    font-size:11px;
+    line-height:1.2;
+    background:color-mix(in srgb, var(--chip-color,#7c6df2) 16%, #20242c);
+    border:1px solid color-mix(in srgb, var(--chip-color,#7c6df2) 38%, var(--border));
+    color:#e5e7eb;
+}
+
+.task-responsible-dot{
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--chip-color,#7c6df2);
+}
+
 /* RESPONSIVE */
 
 @media(max-width:950px){
@@ -928,10 +1032,9 @@ textarea{
             </div>
 
             <div class="form-group full">
-                <label>Responsable</label>
-                <select id="taskResponsible">
-                    <option value="">Sin responsable</option>
-                </select>
+                <label>Responsables</label>
+                <div id="taskResponsiblePicker" class="responsible-picker"></div>
+                <div class="form-help">Seleccioná todas las personas necesarias para esta tarea.</div>
             </div>
 
             <div class="form-group full">
@@ -1234,11 +1337,60 @@ function courseToDb(c){
 function courseFromDb(c){
     return {id:c.id, name:c.name, code:c.code || "", professor:c.professor || "", schedule:c.schedule || "", room:c.classroom || "", color:c.color || "#7c6df2", notes:c.notes || ""};
 }
+function parseResponsibleNames(value){
+    if(Array.isArray(value)){
+        return [...new Set(value.map(v => String(v || "").trim()).filter(Boolean))];
+    }
+
+    const raw = String(value || "").trim();
+    if(!raw) return [];
+
+    // Formato nuevo guardado en Supabase: arreglo JSON dentro del campo de texto.
+    if(raw.startsWith("[")){
+        try{
+            const parsed = JSON.parse(raw);
+            if(Array.isArray(parsed)){
+                return [...new Set(parsed.map(v => String(v || "").trim()).filter(Boolean))];
+            }
+        }catch(error){
+            console.warn("No se logró interpretar la lista de responsables:", error);
+        }
+    }
+
+    // Compatibilidad con datos anteriores escritos manualmente o con un solo responsable.
+    return [...new Set(
+        raw.split(/\s*[,;]\s*/).map(v => v.trim()).filter(Boolean)
+    )];
+}
+
+function getTaskResponsibleNames(task){
+    if(Array.isArray(task?.responsibles)){
+        return parseResponsibleNames(task.responsibles);
+    }
+    return parseResponsibleNames(task?.responsible || "");
+}
+
+function setTaskResponsibleNames(task, names){
+    const clean = parseResponsibleNames(names);
+    task.responsibles = clean;
+    // Se conserva este campo para compatibilidad con versiones anteriores de UniTask.
+    task.responsible = clean.join(", ");
+    return clean;
+}
+
+function taskHasResponsible(task, name){
+    const target = String(name || "").trim().toLowerCase();
+    return !!target && getTaskResponsibleNames(task).some(
+        responsibleName => responsibleName.toLowerCase() === target
+    );
+}
+
 function taskToDb(t){
-    return {id:t.id, name:t.name, course_id:t.courseId || null, course:t.course || "", type:t.type || "Tarea", status:t.status || "No iniciada", priority:t.priority || "Media", date:t.date || "", time:t.time || "", modality:t.mode || "Individual", progress:Number(t.progress || 0), responsible:t.responsible || "", link:t.link || "", notes:t.notes || ""};
+    return {id:t.id, name:t.name, course_id:t.courseId || null, course:t.course || "", type:t.type || "Tarea", status:t.status || "No iniciada", priority:t.priority || "Media", date:t.date || "", time:t.time || "", modality:t.mode || "Individual", progress:Number(t.progress || 0), responsible:JSON.stringify(getTaskResponsibleNames(t)), link:t.link || "", notes:t.notes || ""};
 }
 function taskFromDb(t){
-    return {id:t.id, name:t.name, courseId:t.course_id || "", course:t.course || "", type:t.type || "Tarea", status:t.status || "No iniciada", priority:t.priority || "Media", date:t.date || "", time:t.time || "", mode:t.modality || "Individual", progress:Number(t.progress || 0), responsible:t.responsible || "", link:t.link || "", notes:t.notes || ""};
+    const names = parseResponsibleNames(t.responsible || "");
+    return {id:t.id, name:t.name, courseId:t.course_id || "", course:t.course || "", type:t.type || "Tarea", status:t.status || "No iniciada", priority:t.priority || "Media", date:t.date || "", time:t.time || "", mode:t.modality || "Individual", progress:Number(t.progress || 0), responsibles:names, responsible:names.join(", "), link:t.link || "", notes:t.notes || ""};
 }
 function responsibleToDb(r){
     return {id:r.id, name:r.name};
@@ -1350,10 +1502,11 @@ async function refreshFromCloud(){
 
         // También se reconocen nombres antiguos o responsables que ya aparezcan en tareas.
         nextTasks.forEach(task => {
-            const name = String(task.responsible || "").trim();
-            if(name && !nextResponsibles.some(r => r.name.toLowerCase() === name.toLowerCase())){
-                nextResponsibles.push({id:id(), name});
-            }
+            getTaskResponsibleNames(task).forEach(name => {
+                if(name && !nextResponsibles.some(r => r.name.toLowerCase() === name.toLowerCase())){
+                    nextResponsibles.push({id:id(), name});
+                }
+            });
         });
 
         if(
@@ -1462,24 +1615,26 @@ function ensureResponsiblesFromTasks(){
     let changed = false;
 
     tasks.forEach(task => {
-        const name = String(task.responsible || "").trim();
+        const names = getTaskResponsibleNames(task);
+        setTaskResponsibleNames(task, names);
 
-        if(!name){
-            return;
-        }
+        names.forEach(name => {
+            const exists = responsibles.some(
+                r => String(r.name || "").trim().toLowerCase() === name.toLowerCase()
+            );
 
-        const exists = responsibles.some(
-            r => String(r.name || "").trim().toLowerCase() === name.toLowerCase()
-        );
-
-        if(!exists){
-            responsibles.push({
-                id:id(),
-                name
-            });
-            changed = true;
-        }
+            if(!exists){
+                responsibles.push({
+                    id:id(),
+                    name
+                });
+                changed = true;
+            }
+        });
     });
+
+    // También normaliza el formato de tareas antiguas aunque no aparezcan responsables nuevos.
+    localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
 
     if(changed){
         localStorage.setItem(RESPONSIBLE_KEY, JSON.stringify(responsibles));
@@ -1977,7 +2132,7 @@ function filterTasks(){
                     " " +
                     getTaskCourseName(task) +
                     " " +
-                    (task.responsible || "")
+                    getTaskResponsibleNames(task).join(" ")
                 ).toLowerCase();
 
             return (
@@ -1985,7 +2140,7 @@ function filterTasks(){
                 (!course || task.courseId === course) &&
                 (!status || task.status === status) &&
                 (!priority || task.priority === priority) &&
-                (!responsible || task.responsible === responsible)
+                (!responsible || taskHasResponsible(task, responsible))
             );
         });
 
@@ -2035,16 +2190,7 @@ function renderTaskTable(list){
                         ${escapeHTML(task.name)}
                     </div>
 
-                    ${
-                        task.responsible
-                        ? `
-                        <div class="muted"
-                             style="font-size:12px;margin-top:3px">
-                            ${escapeHTML(task.responsible)}
-                        </div>
-                        `
-                        : ""
-                    }
+                    ${renderTaskResponsibleChips(task)}
                 </td>
 
                 <td>
@@ -2157,30 +2303,58 @@ function refreshCourseSelect(){
     `;
 }
 
-function refreshResponsibleSelect(selectedValue=""){
+function renderTaskResponsibleChips(task){
+    const names = getTaskResponsibleNames(task);
+    if(!names.length) return "";
 
-    const select =
-        document.getElementById("taskResponsible");
-
-    select.innerHTML = `
-
-        <option value="">
-            Sin responsable
-        </option>
-
-        ${responsibles
-            .slice()
-            .sort((a,b) => a.name.localeCompare(b.name, "es"))
-            .map(responsible => `
-                <option value="${escapeHTML(responsible.name)}">
-                    ${escapeHTML(responsible.name)}
-                </option>
+    return `
+        <div class="task-responsibles">
+            ${names.map(name => `
+                <span class="task-responsible-chip" style="--chip-color:${getResponsibleColor(name)}">
+                    <span class="task-responsible-dot"></span>
+                    ${escapeHTML(name)}
+                </span>
             `).join("")}
+        </div>
     `;
+}
 
-    if(selectedValue){
-        select.value = selectedValue;
+function refreshResponsiblePicker(selectedValues=[]){
+    const picker = document.getElementById("taskResponsiblePicker");
+    if(!picker) return;
+
+    const selected = new Set(parseResponsibleNames(selectedValues).map(name => name.toLowerCase()));
+    const ordered = responsibles
+        .slice()
+        .sort((a,b) => a.name.localeCompare(b.name, "es"));
+
+    if(!ordered.length){
+        picker.className = "responsible-picker empty-picker";
+        picker.innerHTML = `No hay responsables registrados. Cerrá esta ventana y agregá uno con el botón “+ Responsable”.`;
+        return;
     }
+
+    picker.className = "responsible-picker";
+    picker.innerHTML = ordered.map(responsible => {
+        const isSelected = selected.has(responsible.name.toLowerCase());
+        const accent = getResponsibleColor(responsible.name);
+        return `
+            <label class="responsible-option ${isSelected ? "selected" : ""}" style="--resp-accent:${accent}">
+                <input
+                    type="checkbox"
+                    class="task-responsible-check"
+                    value="${escapeHTML(responsible.name)}"
+                    ${isSelected ? "checked" : ""}
+                    onchange="this.closest('.responsible-option').classList.toggle('selected', this.checked)">
+                <span class="responsible-option-avatar">${escapeHTML(getResponsibleInitials(responsible.name))}</span>
+                <span class="responsible-option-name">${escapeHTML(responsible.name)}</span>
+            </label>
+        `;
+    }).join("");
+}
+
+function getSelectedTaskResponsibles(){
+    return [...document.querySelectorAll(".task-responsible-check:checked")].map(checkbox => checkbox.value);
 }
 
 function openTaskModal(task=null){
@@ -2205,7 +2379,7 @@ function openTaskModal(task=null){
     form.reset();
 
     refreshCourseSelect();
-    refreshResponsibleSelect(task ? (task.responsible || "") : "");
+    refreshResponsiblePicker(task ? getTaskResponsibleNames(task) : []);
 
     editingTaskId =
         task ? task.id : null;
@@ -2245,9 +2419,6 @@ function openTaskModal(task=null){
 
         taskProgress.value =
             task.progress ?? 0;
-
-        taskResponsible.value =
-            task.responsible || "";
 
         taskLink.value =
             task.link || "";
@@ -2340,8 +2511,11 @@ document
                 progress:
                     Number(taskProgress.value || 0),
 
+                responsibles:
+                    getSelectedTaskResponsibles(),
+
                 responsible:
-                    taskResponsible.value.trim(),
+                    getSelectedTaskResponsibles().join(", "),
 
                 link:
                     taskLink.value.trim(),
@@ -2777,7 +2951,7 @@ function renderResponsibles(){
 
             const assignedTasks =
                 tasks.filter(
-                    t => t.responsible === responsible.name
+                    t => taskHasResponsible(t, responsible.name)
                 );
 
             const pendingTasks =
@@ -2923,7 +3097,7 @@ function toggleResponsiblePending(responsibleId, button){
     if(button){
         const responsible = responsibles.find(r => r.id === responsibleId);
         const count = responsible
-            ? tasks.filter(t => t.responsible === responsible.name && t.status !== "Completada").length
+            ? tasks.filter(t => taskHasResponsible(t, responsible.name) && t.status !== "Completada").length
             : 0;
         button.textContent = opening ? "Ocultar pendientes" : `Ver pendientes (${count})`;
     }
@@ -3016,11 +3190,12 @@ document
                     name
                 };
 
-                // Al cambiar el nombre, también se actualizan las tareas ya asignadas.
+                // Al cambiar el nombre, también se actualizan todas las tareas donde participe.
                 tasks.forEach(task => {
-                    if(task.responsible === oldName){
-                        task.responsible = name;
-                    }
+                    const updated = getTaskResponsibleNames(task).map(assignedName =>
+                        assignedName === oldName ? name : assignedName
+                    );
+                    setTaskResponsibleNames(task, updated);
                 });
 
             }else{
@@ -3064,11 +3239,11 @@ function deleteResponsible(responsibleId){
 
     const related =
         tasks.filter(
-            t => t.responsible === responsible.name
+            t => taskHasResponsible(t, responsible.name)
         );
 
     const warning = related.length
-        ? `\n\nTiene ${related.length} tarea(s) asociada(s). Si se elimina, esas tareas quedarán sin responsable.`
+        ? `\n\nParticipa en ${related.length} tarea(s). Si se elimina, se quitará únicamente su asignación; los demás responsables de esas tareas se conservarán.`
         : "";
 
     const firstConfirmation = confirm(
@@ -3088,8 +3263,11 @@ function deleteResponsible(responsibleId){
     }
 
     tasks.forEach(task => {
-        if(task.responsible === responsible.name){
-            task.responsible = "";
+        if(taskHasResponsible(task, responsible.name)){
+            const remaining = getTaskResponsibleNames(task).filter(
+                name => name !== responsible.name
+            );
+            setTaskResponsibleNames(task, remaining);
         }
     });
 
@@ -3182,7 +3360,7 @@ function showCalendarTask(taskId){
             <div><span class="muted">Entrega</span><br>${formatDate(task.date)}${task.time?" · "+escapeHTML(task.time):""}</div>
             <div><span class="muted">Progreso</span><br>${Number(task.progress||0)}%</div>
             <div><span class="muted">Modalidad</span><br>${escapeHTML(task.mode||"Individual")}</div>
-            <div><span class="muted">Responsable(s)</span><br>${escapeHTML(task.responsible||"Sin registrar")}</div>
+            <div><span class="muted">Responsable(s)</span><br>${getTaskResponsibleNames(task).length ? getTaskResponsibleNames(task).map(name => escapeHTML(name)).join(" · ") : "Sin registrar"}</div>
         </div>
         ${task.notes?`<div style="margin-top:14px"><span class="muted">Notas</span><p>${escapeHTML(task.notes)}</p></div>`:""}
         ${task.link?`<div style="margin-top:10px"><button class="btn small" onclick="window.open('${escapeHTML(task.link)}','_blank','noopener')">Abrir enlace</button></div>`:""}
