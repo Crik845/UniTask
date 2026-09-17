@@ -808,6 +808,373 @@ textarea{
     background:var(--chip-color,#7c6df2);
 }
 
+
+/* HORARIOS POR RESPONSABLE */
+.schedule-person-tabs{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+}
+
+.schedule-person-tab{
+    --person-color:var(--accent);
+    display:flex;
+    align-items:center;
+    gap:9px;
+    min-height:44px;
+    padding:8px 13px 8px 9px;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:#171b22;
+    color:#d1d5db;
+    transition:.18s ease;
+}
+
+.schedule-person-tab:hover{
+    border-color:color-mix(in srgb,var(--person-color) 55%,var(--border));
+    background:#1d222b;
+}
+
+.schedule-person-tab.active{
+    color:white;
+    border-color:color-mix(in srgb,var(--person-color) 70%,var(--border));
+    background:color-mix(in srgb,var(--person-color) 14%,#171b22);
+    box-shadow:0 0 0 1px color-mix(in srgb,var(--person-color) 22%,transparent);
+}
+
+.schedule-person-dot{
+    width:30px;
+    height:30px;
+    border-radius:10px;
+    display:grid;
+    place-items:center;
+    flex:0 0 auto;
+    font-weight:900;
+    font-size:12px;
+    color:white;
+    background:linear-gradient(135deg,var(--person-color),color-mix(in srgb,var(--person-color) 45%,#111419));
+}
+
+.schedule-hero{
+    --person-color:var(--accent);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    background:linear-gradient(135deg,color-mix(in srgb,var(--person-color) 12%,#181c23),#151920 70%);
+    border:1px solid color-mix(in srgb,var(--person-color) 35%,var(--border));
+    border-radius:16px;
+    padding:18px 20px;
+    margin-bottom:18px;
+}
+
+.schedule-hero-main{
+    display:flex;
+    align-items:center;
+    gap:13px;
+    min-width:0;
+}
+
+.schedule-hero-avatar{
+    width:52px;
+    height:52px;
+    border-radius:15px;
+    display:grid;
+    place-items:center;
+    flex:0 0 auto;
+    background:linear-gradient(135deg,var(--person-color),color-mix(in srgb,var(--person-color) 42%,#12161d));
+    color:white;
+    font-size:18px;
+    font-weight:900;
+    box-shadow:0 8px 22px color-mix(in srgb,var(--person-color) 22%,transparent);
+}
+
+.schedule-hero h2{
+    margin:0;
+    font-size:20px;
+}
+
+.schedule-hero p{
+    margin:5px 0 0;
+    color:var(--muted);
+    font-size:13px;
+}
+
+.schedule-layout{
+    display:grid;
+    grid-template-columns:minmax(265px,330px) minmax(0,1fr);
+    gap:18px;
+    align-items:start;
+}
+
+.schedule-course-panel,
+.schedule-week-panel{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px;
+}
+
+.schedule-section-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:14px;
+}
+
+.schedule-section-head h3{
+    margin:0;
+    font-size:16px;
+}
+
+.schedule-course-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.schedule-course-item{
+    --course-color:var(--accent);
+    overflow:hidden;
+    border:1px solid #2b3340;
+    border-radius:12px;
+    background:#12161d;
+}
+
+.schedule-course-item::before{
+    content:"";
+    display:block;
+    height:4px;
+    background:var(--course-color);
+}
+
+.schedule-course-body{
+    padding:12px;
+}
+
+.schedule-course-name{
+    font-weight:800;
+    line-height:1.25;
+}
+
+.schedule-course-code{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:3px;
+}
+
+.schedule-session-list{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+    margin-top:10px;
+}
+
+.schedule-session{
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:8px;
+    align-items:center;
+    padding:8px 9px;
+    border-radius:9px;
+    background:#191e26;
+    border:1px solid #29303b;
+}
+
+.schedule-session-time{
+    font-size:12px;
+    font-weight:700;
+}
+
+.schedule-session-meta{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:2px;
+}
+
+.schedule-session-actions{
+    display:flex;
+    gap:3px;
+}
+
+.schedule-remove-course{
+    width:100%;
+    margin-top:10px;
+}
+
+.schedule-summary{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+}
+
+.schedule-summary-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:6px 9px;
+    border-radius:999px;
+    background:#12161d;
+    border:1px solid var(--border);
+    color:#cbd5e1;
+    font-size:12px;
+}
+
+.schedule-scroll{
+    overflow:auto;
+    border:1px solid var(--border);
+    border-radius:12px;
+    background:#111419;
+}
+
+.schedule-board{
+    min-width:1030px;
+}
+
+.schedule-board-head{
+    display:grid;
+    grid-template-columns:72px repeat(7,minmax(132px,1fr));
+    position:sticky;
+    top:0;
+    z-index:5;
+    background:#151920;
+    border-bottom:1px solid var(--border);
+}
+
+.schedule-board-head > div{
+    min-height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:8px;
+    border-right:1px solid var(--border);
+    color:#d1d5db;
+    font-size:12px;
+    font-weight:800;
+}
+
+.schedule-board-head > div:first-child{
+    color:var(--muted);
+}
+
+.schedule-board-body{
+    display:grid;
+    grid-template-columns:72px repeat(7,minmax(132px,1fr));
+    position:relative;
+}
+
+.schedule-time-axis{
+    position:relative;
+    background:#13171d;
+    border-right:1px solid var(--border);
+}
+
+.schedule-time-label{
+    position:absolute;
+    right:9px;
+    transform:translateY(-50%);
+    color:#8f98a7;
+    font-size:11px;
+    white-space:nowrap;
+}
+
+.schedule-day-lane{
+    position:relative;
+    border-right:1px solid var(--border);
+    background:
+        repeating-linear-gradient(to bottom,
+            transparent 0,
+            transparent 29px,
+            rgba(148,163,184,.07) 29px,
+            rgba(148,163,184,.07) 30px,
+            transparent 30px,
+            transparent 59px,
+            rgba(148,163,184,.15) 59px,
+            rgba(148,163,184,.15) 60px
+        );
+}
+
+.schedule-day-lane.today-lane{
+    background-color:rgba(124,109,242,.035);
+}
+
+.schedule-class-block{
+    --course-color:var(--accent);
+    position:absolute;
+    z-index:2;
+    padding:7px 8px;
+    border:1px solid color-mix(in srgb,var(--course-color) 58%,#2a303b);
+    border-left:4px solid var(--course-color);
+    border-radius:8px;
+    background:linear-gradient(135deg,color-mix(in srgb,var(--course-color) 24%,#1c222b),#171b22);
+    color:#fff;
+    overflow:hidden;
+    text-align:left;
+    cursor:pointer;
+    box-shadow:0 5px 14px rgba(0,0,0,.18);
+}
+
+.schedule-class-block:hover{
+    z-index:4;
+    background:linear-gradient(135deg,color-mix(in srgb,var(--course-color) 34%,#1c222b),#1b2028);
+    box-shadow:0 8px 20px rgba(0,0,0,.28);
+}
+
+.schedule-class-name{
+    font-size:11px;
+    font-weight:800;
+    line-height:1.2;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+}
+
+.schedule-class-time{
+    font-size:10px;
+    color:#d7dde8;
+    margin-top:4px;
+}
+
+.schedule-class-room{
+    font-size:10px;
+    color:#aeb7c6;
+    margin-top:2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+.schedule-empty{
+    text-align:center;
+    color:var(--muted);
+    padding:28px 12px;
+}
+
+.schedule-empty .empty-icon{
+    font-size:34px;
+}
+
+.schedule-conflict-note{
+    margin-top:10px;
+    padding:9px 11px;
+    border-radius:9px;
+    background:rgba(245,158,11,.09);
+    border:1px solid rgba(245,158,11,.28);
+    color:#fcd34d;
+    font-size:12px;
+}
+
+@media(max-width:1100px){
+    .schedule-layout{
+        grid-template-columns:1fr;
+    }
+}
+
 /* RESPONSIVE */
 
 @media(max-width:950px){
@@ -876,6 +1243,7 @@ textarea{
         <button class="active" data-view="dashboard">🏠 Dashboard</button>
         <button data-view="tasks">📋 Mis tareas</button>
         <button data-view="calendar">📅 Calendario</button>
+        <button data-view="schedule">🗓️ Horarios</button>
         <button data-view="courses">📚 Cursos</button>
         <button data-view="responsibles">👥 Responsables</button>
         <button data-view="completed">✅ Completadas</button>
@@ -1253,6 +1621,77 @@ textarea{
 </form>
 </dialog>
 
+<!-- ===================================================== -->
+<!-- MODAL HORARIO / CLASE -->
+<!-- ===================================================== -->
+
+<dialog id="scheduleDialog">
+
+<form id="scheduleForm">
+
+    <div class="modal-head">
+        <h2 id="scheduleModalTitle">Agregar clase al horario</h2>
+        <button type="button" class="icon-btn" onclick="closeScheduleModal()" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="modal-body">
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label>Responsable *</label>
+                <select id="scheduleResponsible" required></select>
+            </div>
+
+            <div class="form-group">
+                <label>Curso *</label>
+                <select id="scheduleCourse" required></select>
+            </div>
+
+            <div class="form-group">
+                <label>Día *</label>
+                <select id="scheduleDay" required>
+                    <option value="1">Lunes</option>
+                    <option value="2">Martes</option>
+                    <option value="3">Miércoles</option>
+                    <option value="4">Jueves</option>
+                    <option value="5">Viernes</option>
+                    <option value="6">Sábado</option>
+                    <option value="7">Domingo</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Aula / lugar</label>
+                <input id="scheduleRoom" placeholder="Ej. D3-03 o virtual">
+            </div>
+
+            <div class="form-group">
+                <label>Hora de inicio *</label>
+                <input type="time" id="scheduleStart" required value="07:30">
+            </div>
+
+            <div class="form-group">
+                <label>Hora de finalización *</label>
+                <input type="time" id="scheduleEnd" required value="09:20">
+            </div>
+
+            <div class="form-group full">
+                <label>Notas</label>
+                <textarea id="scheduleNotes" placeholder="Ej. Laboratorio, semana alterna, enlace de clase..."></textarea>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn" onclick="closeScheduleModal()">Cancelar</button>
+        <button type="submit" class="btn primary">Guardar en horario</button>
+    </div>
+
+</form>
+</dialog>
+
+
 <script>
 
 /* =========================================================
@@ -1262,6 +1701,7 @@ textarea{
 const TASK_KEY = "unitask_tasks_v1";
 const COURSE_KEY = "unitask_courses_v1";
 const RESPONSIBLE_KEY = "unitask_responsibles_v1";
+const SCHEDULE_KEY = "unitask_schedule_v1";
 
 /* Supabase: almacenamiento compartido */
 const SUPABASE_URL = "https://jyznqkmxzquajxagywru.supabase.co";
@@ -1275,6 +1715,7 @@ const SUPABASE_HEADERS = {
 let tasks = JSON.parse(localStorage.getItem(TASK_KEY) || "[]");
 let courses = JSON.parse(localStorage.getItem(COURSE_KEY) || "[]");
 let responsibles = JSON.parse(localStorage.getItem(RESPONSIBLE_KEY) || "[]");
+let scheduleEntries = JSON.parse(localStorage.getItem(SCHEDULE_KEY) || "[]");
 let cloudReady = false;
 let cloudSyncTimer = null;
 
@@ -1282,6 +1723,8 @@ let currentView = "dashboard";
 let editingTaskId = null;
 let editingCourseId = null;
 let editingResponsibleId = null;
+let editingScheduleEntryId = null;
+let selectedScheduleResponsibleId = null;
 let calendarCursor = new Date();
 calendarCursor.setDate(1);
 
@@ -1307,6 +1750,7 @@ function save(){
     localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
     localStorage.setItem(COURSE_KEY, JSON.stringify(courses));
     localStorage.setItem(RESPONSIBLE_KEY, JSON.stringify(responsibles));
+    localStorage.setItem(SCHEDULE_KEY, JSON.stringify(scheduleEntries));
 
     if(cloudReady){
         clearTimeout(cloudSyncTimer);
@@ -1402,10 +1846,20 @@ function taskFromDb(t){
     return {id:t.id, name:t.name, courseId:t.course_id || "", course:t.course || "", type:t.type || "Tarea", status:t.status || "No iniciada", priority:t.priority || "Media", date:t.date || "", time:t.time || "", mode:t.modality || "Individual", progress:Number(t.progress || 0), responsibles:names, responsible:names.join(", "), link:t.link || "", notes:t.notes || ""};
 }
 function responsibleToDb(r){
-    return {id:r.id, name:r.name, color:r.color || getFallbackResponsibleColor(r.name)};
+    // Se conservan id y nombre en Supabase para mantener compatibilidad con tablas existentes.
+    // El color permanece también en el respaldo local de UniTask.
+    return {id:r.id, name:r.name};
 }
 function responsibleFromDb(r){
-    return {id:r.id, name:r.name || "", color:r.color || getFallbackResponsibleColor(r.name || "")};
+    const localMatch = responsibles.find(local =>
+        String(local.id || "") === String(r.id || "") ||
+        String(local.name || "").trim().toLowerCase() === String(r.name || "").trim().toLowerCase()
+    );
+    return {
+        id:r.id,
+        name:r.name || "",
+        color:r.color || localMatch?.color || getFallbackResponsibleColor(r.name || "")
+    };
 }
 
 async function replaceTable(table, rows){
@@ -1823,6 +2277,16 @@ function render(){
             "Próximas fechas de entrega.";
 
         content.innerHTML = renderCalendar();
+    }
+
+    else if(currentView === "schedule"){
+
+        title.textContent = "Horarios";
+
+        subtitle.textContent =
+            "Organizá un horario independiente para cada responsable.";
+
+        content.innerHTML = renderSchedule();
     }
 
     else if(currentView === "courses"){
@@ -2927,10 +3391,19 @@ function deleteCourse(courseId){
             t => t.courseId === courseId
         );
 
-    if(related.length){
+    const scheduleRelated =
+        scheduleEntries.filter(
+            entry => entry.courseId === courseId
+        );
+
+    if(related.length || scheduleRelated.length){
+
+        const reasons = [];
+        if(related.length) reasons.push(`${related.length} tarea(s)`);
+        if(scheduleRelated.length) reasons.push(`${scheduleRelated.length} bloque(s) de horario`);
 
         alert(
-            `No se puede eliminar "${course.name}" porque tiene ${related.length} tarea(s) asociada(s).\n\nEliminá o cambiá esas tareas primero.`
+            `No se puede eliminar "${course.name}" porque tiene ${reasons.join(" y ")} asociado(s).\n\nEliminá o cambiá esas referencias primero.`
         );
 
         return;
@@ -3049,6 +3522,12 @@ function renderResponsibles(){
                         ${pendingTasks.length ? "" : "disabled"}
                         onclick="toggleResponsiblePending('${responsible.id}', this)">
                         ${pendingTasks.length ? `Ver pendientes (${pendingTasks.length})` : "Sin pendientes"}
+                    </button>
+
+                    <button
+                        class="btn small"
+                        onclick="openResponsibleSchedule('${responsible.id}')">
+                        Horario
                     </button>
 
                     <button
@@ -3324,9 +3803,513 @@ function deleteResponsible(responsibleId){
             r => r.id !== responsibleId
         );
 
+    scheduleEntries =
+        scheduleEntries.filter(
+            entry => entry.responsibleId !== responsibleId
+        );
+
+    if(selectedScheduleResponsibleId === responsibleId){
+        selectedScheduleResponsibleId = null;
+    }
+
     save();
     render();
 }
+
+
+/* =========================================================
+   HORARIOS POR RESPONSABLE
+========================================================= */
+
+const SCHEDULE_DAYS = [
+    {value:1, name:"Lunes", short:"Lun"},
+    {value:2, name:"Martes", short:"Mar"},
+    {value:3, name:"Miércoles", short:"Mié"},
+    {value:4, name:"Jueves", short:"Jue"},
+    {value:5, name:"Viernes", short:"Vie"},
+    {value:6, name:"Sábado", short:"Sáb"},
+    {value:7, name:"Domingo", short:"Dom"}
+];
+
+function normalizeScheduleEntries(){
+    scheduleEntries = (Array.isArray(scheduleEntries) ? scheduleEntries : [])
+        .filter(entry => entry && entry.id && entry.responsibleId && entry.courseId)
+        .map(entry => ({
+            id:String(entry.id),
+            responsibleId:String(entry.responsibleId),
+            courseId:String(entry.courseId),
+            day:Math.min(7, Math.max(1, Number(entry.day || 1))),
+            start:String(entry.start || "07:30").slice(0,5),
+            end:String(entry.end || "09:20").slice(0,5),
+            room:String(entry.room || ""),
+            notes:String(entry.notes || "")
+        }));
+
+    localStorage.setItem(SCHEDULE_KEY, JSON.stringify(scheduleEntries));
+}
+
+function timeToMinutes(value){
+    const match = String(value || "").match(/^(\d{1,2}):(\d{2})$/);
+    if(!match) return null;
+    const hours = Number(match[1]);
+    const minutes = Number(match[2]);
+    if(hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+    return hours * 60 + minutes;
+}
+
+function minutesToTime(total){
+    const safe = Math.max(0, Math.min(1439, Number(total || 0)));
+    const hours = Math.floor(safe / 60);
+    const minutes = safe % 60;
+    return `${String(hours).padStart(2,"0")}:${String(minutes).padStart(2,"0")}`;
+}
+
+function getScheduleDayName(day){
+    return SCHEDULE_DAYS.find(item => item.value === Number(day))?.name || "Día";
+}
+
+function getScheduleEntriesForResponsible(responsibleId){
+    return scheduleEntries
+        .filter(entry => entry.responsibleId === responsibleId)
+        .filter(entry => getCourse(entry.courseId))
+        .sort((a,b) => Number(a.day) - Number(b.day) || (a.start || "").localeCompare(b.start || ""));
+}
+
+function ensureSelectedScheduleResponsible(){
+    if(!responsibles.length){
+        selectedScheduleResponsibleId = null;
+        return null;
+    }
+
+    const exists = responsibles.some(r => r.id === selectedScheduleResponsibleId);
+    if(!exists){
+        selectedScheduleResponsibleId = responsibles
+            .slice()
+            .sort((a,b) => a.name.localeCompare(b.name,"es"))[0].id;
+    }
+
+    return responsibles.find(r => r.id === selectedScheduleResponsibleId) || null;
+}
+
+function selectScheduleResponsible(responsibleId){
+    selectedScheduleResponsibleId = responsibleId;
+    render();
+}
+
+function openResponsibleSchedule(responsibleId){
+    selectedScheduleResponsibleId = responsibleId;
+    goToView("schedule");
+}
+
+function groupScheduleByCourse(entries){
+    const map = new Map();
+    entries.forEach(entry => {
+        if(!map.has(entry.courseId)) map.set(entry.courseId, []);
+        map.get(entry.courseId).push(entry);
+    });
+    return [...map.entries()]
+        .map(([courseId,sessions]) => ({course:getCourse(courseId), sessions}))
+        .filter(group => group.course)
+        .sort((a,b) => a.course.name.localeCompare(b.course.name,"es"));
+}
+
+function computeScheduleLayouts(entries){
+    const byDay = new Map(SCHEDULE_DAYS.map(day => [day.value, []]));
+    entries.forEach(entry => byDay.get(Number(entry.day))?.push(entry));
+    const result = new Map();
+
+    byDay.forEach(dayEntries => {
+        const sorted = dayEntries
+            .map(entry => ({entry, start:timeToMinutes(entry.start), end:timeToMinutes(entry.end)}))
+            .filter(item => item.start !== null && item.end !== null && item.end > item.start)
+            .sort((a,b) => a.start - b.start || a.end - b.end);
+
+        let group = [];
+        let groupEnd = -1;
+        const groups = [];
+
+        sorted.forEach(item => {
+            if(group.length && item.start >= groupEnd){
+                groups.push(group);
+                group = [];
+                groupEnd = -1;
+            }
+            group.push(item);
+            groupEnd = Math.max(groupEnd, item.end);
+        });
+        if(group.length) groups.push(group);
+
+        groups.forEach(items => {
+            const columns = [];
+            items.forEach(item => {
+                let col = columns.findIndex(end => end <= item.start);
+                if(col === -1){
+                    col = columns.length;
+                    columns.push(item.end);
+                }else{
+                    columns[col] = item.end;
+                }
+                item.col = col;
+            });
+            const totalCols = Math.max(1, columns.length);
+            items.forEach(item => result.set(item.entry.id, {col:item.col, cols:totalCols}));
+        });
+    });
+
+    return result;
+}
+
+function getScheduleRange(entries){
+    let min = 7 * 60;
+    let max = 22 * 60;
+
+    entries.forEach(entry => {
+        const start = timeToMinutes(entry.start);
+        const end = timeToMinutes(entry.end);
+        if(start !== null) min = Math.min(min, Math.floor(start / 60) * 60);
+        if(end !== null) max = Math.max(max, Math.ceil(end / 60) * 60);
+    });
+
+    min = Math.max(5 * 60, min);
+    max = Math.min(24 * 60, Math.max(min + 6 * 60, max));
+    return {start:min, end:max};
+}
+
+function renderScheduleBoard(entries){
+    const range = getScheduleRange(entries);
+    const height = range.end - range.start;
+    const layouts = computeScheduleLayouts(entries);
+    const todayJs = new Date().getDay();
+    const todayDay = todayJs === 0 ? 7 : todayJs;
+
+    const hourLabels = [];
+    for(let minute = range.start; minute <= range.end; minute += 60){
+        hourLabels.push(`<span class="schedule-time-label" style="top:${minute - range.start}px">${minutesToTime(minute)}</span>`);
+    }
+
+    const lanes = SCHEDULE_DAYS.map(day => {
+        const dayEntries = entries.filter(entry => Number(entry.day) === day.value);
+        const blocks = dayEntries.map(entry => {
+            const course = getCourse(entry.courseId);
+            if(!course) return "";
+            const start = timeToMinutes(entry.start);
+            const end = timeToMinutes(entry.end);
+            if(start === null || end === null || end <= start) return "";
+            const top = start - range.start;
+            const blockHeight = Math.max(34, end - start);
+            const layout = layouts.get(entry.id) || {col:0, cols:1};
+            const width = 100 / layout.cols;
+            const left = width * layout.col;
+            return `
+                <button
+                    type="button"
+                    class="schedule-class-block"
+                    style="--course-color:${course.color || '#7c6df2'};top:${top}px;height:${blockHeight}px;left:calc(${left}% + 4px);width:calc(${width}% - 8px)"
+                    onclick="editScheduleEntry('${entry.id}')"
+                    title="Editar ${escapeHTML(course.name)}">
+                    <div class="schedule-class-name">${escapeHTML(course.name)}</div>
+                    <div class="schedule-class-time">${escapeHTML(entry.start)}–${escapeHTML(entry.end)}</div>
+                    ${entry.room ? `<div class="schedule-class-room">📍 ${escapeHTML(entry.room)}</div>` : ""}
+                </button>
+            `;
+        }).join("");
+
+        return `<div class="schedule-day-lane ${todayDay === day.value ? 'today-lane' : ''}" style="height:${height}px">${blocks}</div>`;
+    }).join("");
+
+    return `
+        <div class="schedule-scroll">
+            <div class="schedule-board">
+                <div class="schedule-board-head">
+                    <div>Hora</div>
+                    ${SCHEDULE_DAYS.map(day => `<div>${day.name}</div>`).join("")}
+                </div>
+                <div class="schedule-board-body">
+                    <div class="schedule-time-axis" style="height:${height}px">${hourLabels.join("")}</div>
+                    ${lanes}
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderSchedule(){
+    normalizeScheduleEntries();
+
+    if(!responsibles.length){
+        return `
+            <div class="panel">
+                ${emptyState("🗓️","Primero registrá al menos un responsable para crear horarios separados.")}
+                <div style="text-align:center">
+                    <button class="btn primary" onclick="openResponsibleModal()">+ Agregar responsable</button>
+                </div>
+            </div>
+        `;
+    }
+
+    const responsible = ensureSelectedScheduleResponsible();
+    if(!responsible) return "";
+
+    const orderedResponsibles = responsibles.slice().sort((a,b) => a.name.localeCompare(b.name,"es"));
+    const entries = getScheduleEntriesForResponsible(responsible.id);
+    const groups = groupScheduleByCourse(entries);
+    const personColor = responsible.color || getResponsibleColor(responsible.name);
+    const uniqueCourses = new Set(entries.map(entry => entry.courseId)).size;
+    const weeklyMinutes = entries.reduce((sum,entry) => {
+        const start = timeToMinutes(entry.start);
+        const end = timeToMinutes(entry.end);
+        return sum + (start !== null && end !== null && end > start ? end - start : 0);
+    },0);
+
+    return `
+        <div class="schedule-person-tabs">
+            ${orderedResponsibles.map(person => {
+                const count = getScheduleEntriesForResponsible(person.id).length;
+                const color = person.color || getResponsibleColor(person.name);
+                return `
+                    <button type="button" class="schedule-person-tab ${person.id === responsible.id ? 'active' : ''}" style="--person-color:${color}" onclick="selectScheduleResponsible('${person.id}')">
+                        <span class="schedule-person-dot">${escapeHTML(getResponsibleInitials(person.name))}</span>
+                        <span>Horario de ${escapeHTML(person.name)}</span>
+                        <span class="muted">${count}</span>
+                    </button>
+                `;
+            }).join("")}
+        </div>
+
+        <section class="schedule-hero" style="--person-color:${personColor}">
+            <div class="schedule-hero-main">
+                <div class="schedule-hero-avatar">${escapeHTML(getResponsibleInitials(responsible.name))}</div>
+                <div>
+                    <h2>Horario de ${escapeHTML(responsible.name)}</h2>
+                    <p>Cada horario es independiente: aquí solo aparecen los cursos asignados a esta persona.</p>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn" onclick="openCourseModal()">+ Crear curso</button>
+                <button class="btn primary" onclick="openScheduleModal(null,'${responsible.id}')">+ Agregar clase</button>
+            </div>
+        </section>
+
+        <div class="schedule-layout">
+            <aside class="schedule-course-panel">
+                <div class="schedule-section-head">
+                    <h3>Cursos de ${escapeHTML(responsible.name)}</h3>
+                    <span class="muted">${uniqueCourses}</span>
+                </div>
+
+                <div class="schedule-summary">
+                    <span class="schedule-summary-chip">📚 ${uniqueCourses} curso(s)</span>
+                    <span class="schedule-summary-chip">🧩 ${entries.length} bloque(s)</span>
+                    <span class="schedule-summary-chip">⏱ ${Math.floor(weeklyMinutes/60)} h ${weeklyMinutes%60} min/semana</span>
+                </div>
+
+                ${groups.length ? `
+                    <div class="schedule-course-list">
+                        ${groups.map(group => {
+                            const course = group.course;
+                            return `
+                                <div class="schedule-course-item" style="--course-color:${course.color || '#7c6df2'}">
+                                    <div class="schedule-course-body">
+                                        <div class="schedule-course-name">${escapeHTML(course.name)}</div>
+                                        ${course.code ? `<div class="schedule-course-code">${escapeHTML(course.code)}</div>` : ""}
+                                        <div class="schedule-session-list">
+                                            ${group.sessions.map(session => `
+                                                <div class="schedule-session">
+                                                    <div>
+                                                        <div class="schedule-session-time">${escapeHTML(getScheduleDayName(session.day))} · ${escapeHTML(session.start)}–${escapeHTML(session.end)}</div>
+                                                        <div class="schedule-session-meta">${session.room ? `📍 ${escapeHTML(session.room)}` : "Sin aula registrada"}</div>
+                                                    </div>
+                                                    <div class="schedule-session-actions">
+                                                        <button class="icon-btn" onclick="editScheduleEntry('${session.id}')" title="Modificar">✎</button>
+                                                        <button class="icon-btn" onclick="deleteScheduleEntry('${session.id}')" title="Eliminar bloque">🗑</button>
+                                                    </div>
+                                                </div>
+                                            `).join("")}
+                                        </div>
+                                        <button class="btn small danger schedule-remove-course" onclick="removeCourseFromSchedule('${responsible.id}','${course.id}')">Quitar curso del horario</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join("")}
+                    </div>
+                ` : `
+                    <div class="schedule-empty">
+                        <div class="empty-icon">📘</div>
+                        <div>Este horario todavía no tiene cursos.</div>
+                        <div style="margin-top:12px"><button class="btn primary" onclick="openScheduleModal(null,'${responsible.id}')">Agregar primera clase</button></div>
+                    </div>
+                `}
+            </aside>
+
+            <section class="schedule-week-panel">
+                <div class="schedule-section-head">
+                    <h3>Vista semanal</h3>
+                    <span class="muted">Lunes a domingo</span>
+                </div>
+                ${renderScheduleBoard(entries)}
+                ${detectScheduleConflicts(entries).length ? `<div class="schedule-conflict-note">⚠ Se detectaron ${detectScheduleConflicts(entries).length} cruce(s) de horario. Los bloques se muestran lado a lado para identificarlos.</div>` : ""}
+            </section>
+        </div>
+    `;
+}
+
+function detectScheduleConflicts(entries){
+    const conflicts = [];
+    for(let i=0;i<entries.length;i++){
+        for(let j=i+1;j<entries.length;j++){
+            const a = entries[i], b = entries[j];
+            if(Number(a.day) !== Number(b.day)) continue;
+            const aStart=timeToMinutes(a.start), aEnd=timeToMinutes(a.end);
+            const bStart=timeToMinutes(b.start), bEnd=timeToMinutes(b.end);
+            if(aStart === null || aEnd === null || bStart === null || bEnd === null) continue;
+            if(aStart < bEnd && bStart < aEnd) conflicts.push([a.id,b.id]);
+        }
+    }
+    return conflicts;
+}
+
+function refreshScheduleFormSelects(responsibleId, courseId){
+    const responsibleSelect = document.getElementById("scheduleResponsible");
+    const courseSelect = document.getElementById("scheduleCourse");
+
+    responsibleSelect.innerHTML = responsibles
+        .slice()
+        .sort((a,b) => a.name.localeCompare(b.name,"es"))
+        .map(person => `<option value="${person.id}">${escapeHTML(person.name)}</option>`)
+        .join("");
+
+    courseSelect.innerHTML = courses
+        .slice()
+        .sort((a,b) => a.name.localeCompare(b.name,"es"))
+        .map(course => `<option value="${course.id}">${escapeHTML(course.name)}${course.code ? " — " + escapeHTML(course.code) : ""}</option>`)
+        .join("");
+
+    if(responsibleId) responsibleSelect.value = responsibleId;
+    if(courseId) courseSelect.value = courseId;
+}
+
+function openScheduleModal(entry=null, responsibleId=null){
+    if(!responsibles.length){
+        alert("Primero agregá al menos un responsable.");
+        openResponsibleModal();
+        return;
+    }
+
+    if(!courses.length){
+        alert("Primero agregá al menos un curso al catálogo.");
+        openCourseModal();
+        return;
+    }
+
+    const form = document.getElementById("scheduleForm");
+    form.reset();
+    editingScheduleEntryId = entry ? entry.id : null;
+
+    document.getElementById("scheduleModalTitle").textContent = entry ? "Modificar clase del horario" : "Agregar clase al horario";
+    refreshScheduleFormSelects(entry?.responsibleId || responsibleId || selectedScheduleResponsibleId, entry?.courseId || "");
+
+    document.getElementById("scheduleDay").value = String(entry?.day || 1);
+    document.getElementById("scheduleStart").value = entry?.start || "07:30";
+    document.getElementById("scheduleEnd").value = entry?.end || "09:20";
+    document.getElementById("scheduleRoom").value = entry?.room || "";
+    document.getElementById("scheduleNotes").value = entry?.notes || "";
+
+    document.getElementById("scheduleDialog").showModal();
+}
+
+function closeScheduleModal(){
+    document.getElementById("scheduleForm").reset();
+    editingScheduleEntryId = null;
+    document.getElementById("scheduleDialog").close();
+}
+
+function editScheduleEntry(entryId){
+    const entry = scheduleEntries.find(item => item.id === entryId);
+    if(entry) openScheduleModal(entry, entry.responsibleId);
+}
+
+function deleteScheduleEntry(entryId){
+    const entry = scheduleEntries.find(item => item.id === entryId);
+    if(!entry) return;
+    const course = getCourse(entry.courseId);
+    if(!confirm(`¿Eliminar del horario el bloque de ${course?.name || "este curso"} del ${getScheduleDayName(entry.day)} de ${entry.start} a ${entry.end}?`)) return;
+    scheduleEntries = scheduleEntries.filter(item => item.id !== entryId);
+    save();
+    render();
+}
+
+function removeCourseFromSchedule(responsibleId, courseId){
+    const responsible = responsibles.find(r => r.id === responsibleId);
+    const course = getCourse(courseId);
+    const count = scheduleEntries.filter(entry => entry.responsibleId === responsibleId && entry.courseId === courseId).length;
+    if(!count) return;
+    if(!confirm(`¿Quitar "${course?.name || "este curso"}" del horario de ${responsible?.name || "este responsable"}?\n\nSe eliminarán ${count} bloque(s) semanales de ese curso.`)) return;
+    scheduleEntries = scheduleEntries.filter(entry => !(entry.responsibleId === responsibleId && entry.courseId === courseId));
+    save();
+    render();
+}
+
+document.getElementById("scheduleForm").addEventListener("submit", event => {
+    event.preventDefault();
+
+    const responsibleId = document.getElementById("scheduleResponsible").value;
+    const courseId = document.getElementById("scheduleCourse").value;
+    const day = Number(document.getElementById("scheduleDay").value);
+    const start = document.getElementById("scheduleStart").value;
+    const end = document.getElementById("scheduleEnd").value;
+    const room = document.getElementById("scheduleRoom").value.trim();
+    const notes = document.getElementById("scheduleNotes").value.trim();
+
+    const startMinutes = timeToMinutes(start);
+    const endMinutes = timeToMinutes(end);
+    if(startMinutes === null || endMinutes === null || endMinutes <= startMinutes){
+        alert("La hora de finalización debe ser posterior a la hora de inicio.");
+        return;
+    }
+
+    if(!responsibles.some(r => r.id === responsibleId) || !getCourse(courseId)){
+        alert("Seleccioná un responsable y un curso válidos.");
+        return;
+    }
+
+    const data = {
+        id: editingScheduleEntryId || id(),
+        responsibleId,
+        courseId,
+        day,
+        start,
+        end,
+        room,
+        notes
+    };
+
+    const overlaps = scheduleEntries.filter(other => {
+        if(other.id === data.id || other.responsibleId !== responsibleId || Number(other.day) !== day) return false;
+        const otherStart = timeToMinutes(other.start);
+        const otherEnd = timeToMinutes(other.end);
+        return otherStart !== null && otherEnd !== null && startMinutes < otherEnd && otherStart < endMinutes;
+    });
+
+    if(overlaps.length){
+        const names = [...new Set(overlaps.map(other => getCourse(other.courseId)?.name).filter(Boolean))];
+        const proceed = confirm(`Este bloque se cruza con ${names.join(", ") || "otra clase"}.\n\n¿Querés guardarlo de todas formas?`);
+        if(!proceed) return;
+    }
+
+    if(editingScheduleEntryId){
+        const index = scheduleEntries.findIndex(item => item.id === editingScheduleEntryId);
+        if(index >= 0) scheduleEntries[index] = data;
+    }else{
+        scheduleEntries.push(data);
+    }
+
+    selectedScheduleResponsibleId = responsibleId;
+    save();
+    closeScheduleModal();
+    render();
+});
+
+normalizeScheduleEntries();
 
 /* =========================================================
    CALENDARIO
@@ -3507,6 +4490,11 @@ configureDialog(
     closeResponsibleModal
 );
 
+configureDialog(
+    document.getElementById("scheduleDialog"),
+    closeScheduleModal
+);
+
 /* =========================================================
    EXPORTAR RESPALDO
 ========================================================= */
@@ -3517,7 +4505,7 @@ function exportData(){
 
         app:"UniTask",
 
-        version:4,
+        version:5,
 
         exportedAt:
             new Date().toISOString(),
@@ -3525,6 +4513,8 @@ function exportData(){
         courses:courses,
 
         responsibles:responsibles,
+
+        scheduleEntries:scheduleEntries,
 
         tasks:tasks
     };
@@ -3589,6 +4579,7 @@ function importData(event){
             let importedTasks = [];
             let importedCourses = [];
             let importedResponsibles = [];
+            let importedScheduleEntries = [];
 
             /*
                Respaldo nuevo
@@ -3610,6 +4601,11 @@ function importData(event){
                 importedResponsibles =
                     Array.isArray(data.responsibles)
                     ? data.responsibles
+                    : [];
+
+                importedScheduleEntries =
+                    Array.isArray(data.scheduleEntries)
+                    ? data.scheduleEntries
                     : [];
 
             }
@@ -3650,7 +4646,11 @@ function importData(event){
             responsibles =
                 importedResponsibles;
 
+            scheduleEntries =
+                importedScheduleEntries;
+
             ensureResponsiblesFromTasks();
+            normalizeScheduleEntries();
 
             save();
 
