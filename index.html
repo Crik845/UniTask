@@ -1211,12 +1211,21 @@ textarea{
 
         <div class="form-grid">
 
-            <div class="form-group full">
+            <div class="form-group">
                 <label>Nombre del responsable *</label>
                 <input
                     id="responsibleName"
                     required
                     placeholder="Ej. Lorenzo Montero"
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Color identificador</label>
+                <input
+                    type="color"
+                    id="responsibleColor"
+                    value="#7c6df2"
                 >
             </div>
 
@@ -1393,10 +1402,10 @@ function taskFromDb(t){
     return {id:t.id, name:t.name, courseId:t.course_id || "", course:t.course || "", type:t.type || "Tarea", status:t.status || "No iniciada", priority:t.priority || "Media", date:t.date || "", time:t.time || "", mode:t.modality || "Individual", progress:Number(t.progress || 0), responsibles:names, responsible:names.join(", "), link:t.link || "", notes:t.notes || ""};
 }
 function responsibleToDb(r){
-    return {id:r.id, name:r.name};
+    return {id:r.id, name:r.name, color:r.color || getFallbackResponsibleColor(r.name)};
 }
 function responsibleFromDb(r){
-    return {id:r.id, name:r.name || ""};
+    return {id:r.id, name:r.name || "", color:r.color || getFallbackResponsibleColor(r.name || "")};
 }
 
 async function replaceTable(table, rows){
@@ -1472,6 +1481,11 @@ async function loadCloudData(){
         responsibles = responsibleCloud.rows.map(responsibleFromDb);
     }
 
+    responsibles = responsibles.map(responsible => ({
+        ...responsible,
+        color: responsible.color || getFallbackResponsibleColor(responsible.name)
+    }));
+
     ensureResponsiblesFromTasks();
 
     localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
@@ -1504,7 +1518,7 @@ async function refreshFromCloud(){
         nextTasks.forEach(task => {
             getTaskResponsibleNames(task).forEach(name => {
                 if(name && !nextResponsibles.some(r => r.name.toLowerCase() === name.toLowerCase())){
-                    nextResponsibles.push({id:id(), name});
+                    nextResponsibles.push({id:id(), name, color:getFallbackResponsibleColor(name)});
                 }
             });
         });
@@ -1614,6 +1628,17 @@ function getTaskCourseName(task){
 function ensureResponsiblesFromTasks(){
     let changed = false;
 
+    responsibles = responsibles.map(responsible => {
+        const normalizedColor = responsible.color || getFallbackResponsibleColor(responsible.name);
+        if(normalizedColor !== responsible.color){
+            changed = true;
+        }
+        return {
+            ...responsible,
+            color: normalizedColor
+        };
+    });
+
     tasks.forEach(task => {
         const names = getTaskResponsibleNames(task);
         setTaskResponsibleNames(task, names);
@@ -1626,7 +1651,8 @@ function ensureResponsiblesFromTasks(){
             if(!exists){
                 responsibles.push({
                     id:id(),
-                    name
+                    name,
+                    color
                 });
                 changed = true;
             }
@@ -1646,7 +1672,7 @@ function getResponsibleInitials(name=""){
     return parts.slice(0,2).map(part => part[0]?.toUpperCase() || "").join("") || "R";
 }
 
-function getResponsibleColor(name=""){
+function getFallbackResponsibleColor(name=""){
     const palette = [
         "#7c6df2",
         "#3b82f6",
@@ -1665,6 +1691,16 @@ function getResponsibleColor(name=""){
     }
 
     return palette[Math.abs(hash) % palette.length];
+}
+
+function getResponsibleByName(name=""){
+    const target = String(name || "").trim().toLowerCase();
+    return responsibles.find(r => String(r.name || "").trim().toLowerCase() === target) || null;
+}
+
+function getResponsibleColor(name=""){
+    const responsible = getResponsibleByName(name);
+    return responsible?.color || getFallbackResponsibleColor(name);
 }
 
 /* =========================================================
@@ -3120,6 +3156,8 @@ function openResponsibleModal(responsible=null){
         ? "Editar responsable"
         : "Nuevo responsable";
 
+    document.getElementById("responsibleColor").value = responsible?.color || "#7c6df2";
+
     if(responsible){
         document.getElementById("responsibleName").value = responsible.name || "";
     }
@@ -3134,6 +3172,9 @@ function closeResponsibleModal(){
     document
         .getElementById("responsibleForm")
         .reset();
+
+    const colorInput = document.getElementById("responsibleColor");
+    if(colorInput) colorInput.value = "#7c6df2";
 
     editingResponsibleId = null;
 
@@ -3155,6 +3196,11 @@ document
                     .getElementById("responsibleName")
                     .value
                     .trim();
+
+            const color =
+                document
+                    .getElementById("responsibleColor")
+                    .value || getFallbackResponsibleColor(name);
 
             if(!name){
                 return;
@@ -3187,7 +3233,8 @@ document
 
                 responsibles[index] = {
                     ...responsibles[index],
-                    name
+                    name,
+                    color
                 };
 
                 // Al cambiar el nombre, también se actualizan todas las tareas donde participe.
@@ -3202,7 +3249,8 @@ document
 
                 responsibles.push({
                     id:id(),
-                    name
+                    name,
+                    color
                 });
             }
 
