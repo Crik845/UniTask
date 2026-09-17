@@ -1177,10 +1177,13 @@ textarea{
 
 .schedule-time-label{
     position:absolute;
-    right:9px;
+    left:0;
+    right:0;
     transform:translateY(-50%);
-    color:#8f98a7;
-    font-size:11px;
+    color:#9ca7b8;
+    font-size:10px;
+    line-height:1;
+    text-align:center;
     white-space:nowrap;
 }
 
@@ -1208,16 +1211,21 @@ textarea{
     --course-color:var(--accent);
     position:absolute;
     z-index:2;
-    padding:7px 8px;
+    padding:8px 10px;
     border:1px solid color-mix(in srgb,var(--course-color) 58%,#2a303b);
     border-left:4px solid var(--course-color);
     border-radius:8px;
     background:linear-gradient(135deg,color-mix(in srgb,var(--course-color) 24%,#1c222b),#171b22);
     color:#fff;
     overflow:hidden;
-    text-align:left;
+    text-align:center;
     cursor:pointer;
     box-shadow:0 5px 14px rgba(0,0,0,.18);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
 }
 
 .schedule-class-block:hover{
@@ -1227,28 +1235,34 @@ textarea{
 }
 
 .schedule-class-name{
-    font-size:11px;
-    font-weight:800;
+    width:100%;
+    font-size:12px;
+    font-weight:850;
     line-height:1.2;
     display:-webkit-box;
     -webkit-line-clamp:2;
     -webkit-box-orient:vertical;
     overflow:hidden;
+    text-align:center;
 }
 
 .schedule-class-time{
-    font-size:10px;
-    color:#d7dde8;
-    margin-top:4px;
+    font-size:10.5px;
+    color:#e2e7ef;
+    margin-top:1px;
+    line-height:1.15;
+    text-align:center;
 }
 
 .schedule-class-room{
-    font-size:10px;
-    color:#aeb7c6;
-    margin-top:2px;
+    max-width:100%;
+    font-size:10.5px;
+    color:#b9c3d1;
+    margin-top:0;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
+    text-align:center;
 }
 
 .schedule-empty{
@@ -1454,11 +1468,13 @@ body.schedule-fullscreen-open{
 
 .schedule-fullscreen-time-label{
     position:absolute;
-    right:6px;
+    left:0;
+    right:0;
     transform:translateY(-50%);
-    color:#9aa6b7;
-    font-size:clamp(8px,.75vw,10px);
+    color:#a5b0c0;
+    font-size:clamp(8.5px,.72vw,10.5px);
     line-height:1;
+    text-align:center;
     white-space:nowrap;
 }
 
@@ -1466,32 +1482,56 @@ body.schedule-fullscreen-open{
     --course-color:var(--accent);
     position:absolute;
     z-index:2;
-    padding:5px 6px;
+    padding:6px 8px;
     border:1px solid color-mix(in srgb,var(--course-color) 62%,#2a303b);
     border-left:4px solid var(--course-color);
     border-radius:7px;
     background:linear-gradient(135deg,color-mix(in srgb,var(--course-color) 24%,#1c222b),#171b22);
     color:white;
     overflow:hidden;
-    text-align:left;
+    text-align:center;
     box-shadow:0 2px 7px rgba(0,0,0,.18);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
 }
 
 .schedule-fullscreen-class-name{
-    font-size:clamp(8px,.8vw,11px);
+    width:100%;
+    font-size:clamp(9.5px,.92vw,13px);
     font-weight:900;
-    line-height:1.13;
+    line-height:1.16;
     display:-webkit-box;
     -webkit-line-clamp:2;
     -webkit-box-orient:vertical;
     overflow:hidden;
+    text-align:center;
 }
 
 .schedule-fullscreen-class-meta{
-    margin-top:3px;
-    font-size:clamp(7px,.68vw,9px);
-    color:#d7dde8;
-    line-height:1.18;
+    width:100%;
+    margin-top:0;
+    font-size:clamp(8.5px,.76vw,10.5px);
+    color:#e0e6ef;
+    line-height:1.22;
+    text-align:center;
+}
+
+.schedule-fullscreen-class-block[data-duration-short="1"]{
+    padding:3px 5px;
+    gap:1px;
+}
+
+.schedule-fullscreen-class-block[data-duration-short="1"] .schedule-fullscreen-class-name{
+    font-size:clamp(8.5px,.78vw,11px);
+    -webkit-line-clamp:1;
+}
+
+.schedule-fullscreen-class-block[data-duration-short="1"] .schedule-fullscreen-class-meta{
+    font-size:clamp(7.5px,.68vw,9px);
+    line-height:1.1;
 }
 
 .schedule-fullscreen-empty{
@@ -4728,7 +4768,7 @@ function renderScheduleBoard(entries){
     const height = range.end - range.start;
     const layouts = computeScheduleLayouts(entries);
     const hourLabels = [];
-    for(let minute = range.start; minute <= range.end; minute += 60){
+    for(let minute = range.start; minute <= range.end; minute += 30){
         hourLabels.push(`<span class="schedule-time-label" style="top:${minute - range.start}px">${minutesToTime(minute)}</span>`);
     }
 
@@ -4785,7 +4825,7 @@ function renderFullscreenScheduleBoard(entries){
     const layouts = computeScheduleLayouts(entries);
 
     const hourLabels = [];
-    for(let minute = range.start; minute <= range.end; minute += 60){
+    for(let minute = range.start; minute <= range.end; minute += 30){
         hourLabels.push(`
             <span class="schedule-fullscreen-time-label" data-offset="${minute - range.start}">
                 ${minutesToTime(minute)}
@@ -4813,6 +4853,7 @@ function renderFullscreenScheduleBoard(entries){
                     class="schedule-fullscreen-class-block"
                     data-offset="${offset}"
                     data-duration="${duration}"
+                    data-duration-short="${duration <= 60 ? 1 : 0}"
                     style="--course-color:${course.color || '#7c6df2'};left:calc(${left}% + 3px);width:calc(${width}% - 6px)"
                     title="${escapeHTML(course.name)} · ${escapeHTML(entry.start)}–${escapeHTML(entry.end)}">
                     <div class="schedule-fullscreen-class-name">${escapeHTML(course.name)}</div>
@@ -4869,7 +4910,7 @@ function fitScheduleFullscreen(){
         const offset = Number(block.dataset.offset || 0);
         const duration = Number(block.dataset.duration || 0);
         block.style.top = `${offset * scale}px`;
-        block.style.height = `${Math.max(16, duration * scale)}px`;
+        block.style.height = `${Math.max(22, duration * scale)}px`;
     });
 
     view.querySelectorAll(".schedule-fullscreen-day-lane").forEach(lane => {
