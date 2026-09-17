@@ -390,6 +390,57 @@ tr:hover td{
     margin-top:15px;
 }
 
+/* RESPONSABLES */
+
+.responsible-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:15px;
+}
+
+.responsible-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:18px;
+}
+
+.responsible-head{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.responsible-avatar{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:#252a34;
+    border:1px solid var(--border);
+    font-weight:800;
+    color:#ddd8ff;
+    flex:0 0 auto;
+}
+
+.responsible-name{
+    font-weight:700;
+    font-size:16px;
+}
+
+.responsible-meta{
+    color:var(--muted);
+    font-size:13px;
+    margin-top:4px;
+}
+
+.responsible-actions{
+    display:flex;
+    gap:6px;
+    margin-top:15px;
+}
+
 /* EMPTY */
 
 .empty{
@@ -600,6 +651,7 @@ textarea{
         <button data-view="tasks">📋 Mis tareas</button>
         <button data-view="calendar">📅 Calendario</button>
         <button data-view="courses">📚 Cursos</button>
+        <button data-view="responsibles">👥 Responsables</button>
         <button data-view="completed">✅ Completadas</button>
     </nav>
 
@@ -637,6 +689,10 @@ textarea{
         <div class="actions">
             <button class="btn" id="newCourseTop" onclick="openCourseModal()">
                 + Curso
+            </button>
+
+            <button class="btn" id="newResponsibleTop" onclick="openResponsibleModal()">
+                + Responsable
             </button>
 
             <button class="btn primary" onclick="openTaskModal()">
@@ -750,11 +806,10 @@ textarea{
             </div>
 
             <div class="form-group full">
-                <label>Responsables</label>
-                <input
-                    id="taskResponsible"
-                    placeholder="Ej. Cristian, Rachelly, Hilary"
-                >
+                <label>Responsable</label>
+                <select id="taskResponsible">
+                    <option value="">Sin responsable</option>
+                </select>
             </div>
 
             <div class="form-group full">
@@ -905,6 +960,65 @@ textarea{
 </form>
 </dialog>
 
+<!-- ===================================================== -->
+<!-- MODAL RESPONSABLE -->
+<!-- ===================================================== -->
+
+<dialog id="responsibleDialog">
+
+<form id="responsibleForm">
+
+    <div class="modal-head">
+
+        <h2 id="responsibleModalTitle">Nuevo responsable</h2>
+
+        <button
+            type="button"
+            class="icon-btn"
+            onclick="closeResponsibleModal()"
+            aria-label="Cerrar">
+            ✕
+        </button>
+
+    </div>
+
+    <div class="modal-body">
+
+        <div class="form-grid">
+
+            <div class="form-group full">
+                <label>Nombre del responsable *</label>
+                <input
+                    id="responsibleName"
+                    required
+                    placeholder="Ej. Lorenzo Montero"
+                >
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="modal-footer">
+
+        <button
+            type="button"
+            class="btn"
+            onclick="closeResponsibleModal()">
+            Cancelar
+        </button>
+
+        <button
+            type="submit"
+            class="btn primary">
+            Guardar responsable
+        </button>
+
+    </div>
+
+</form>
+</dialog>
+
 <script>
 
 /* =========================================================
@@ -913,6 +1027,7 @@ textarea{
 
 const TASK_KEY = "unitask_tasks_v1";
 const COURSE_KEY = "unitask_courses_v1";
+const RESPONSIBLE_KEY = "unitask_responsibles_v1";
 
 /* Supabase: almacenamiento compartido */
 const SUPABASE_URL = "https://jyznqkmxzquajxagywru.supabase.co";
@@ -925,12 +1040,14 @@ const SUPABASE_HEADERS = {
 
 let tasks = JSON.parse(localStorage.getItem(TASK_KEY) || "[]");
 let courses = JSON.parse(localStorage.getItem(COURSE_KEY) || "[]");
+let responsibles = JSON.parse(localStorage.getItem(RESPONSIBLE_KEY) || "[]");
 let cloudReady = false;
 let cloudSyncTimer = null;
 
 let currentView = "dashboard";
 let editingTaskId = null;
 let editingCourseId = null;
+let editingResponsibleId = null;
 let calendarCursor = new Date();
 calendarCursor.setDate(1);
 
@@ -955,6 +1072,7 @@ function escapeHTML(value=""){
 function save(){
     localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
     localStorage.setItem(COURSE_KEY, JSON.stringify(courses));
+    localStorage.setItem(RESPONSIBLE_KEY, JSON.stringify(responsibles));
 
     if(cloudReady){
         clearTimeout(cloudSyncTimer);
@@ -1000,6 +1118,12 @@ function taskToDb(t){
 function taskFromDb(t){
     return {id:t.id, name:t.name, courseId:t.course_id || "", course:t.course || "", type:t.type || "Tarea", status:t.status || "No iniciada", priority:t.priority || "Media", date:t.date || "", time:t.time || "", mode:t.modality || "Individual", progress:Number(t.progress || 0), responsible:t.responsible || "", link:t.link || "", notes:t.notes || ""};
 }
+function responsibleToDb(r){
+    return {id:r.id, name:r.name};
+}
+function responsibleFromDb(r){
+    return {id:r.id, name:r.name || ""};
+}
 
 async function replaceTable(table, rows){
     const existing = await supabaseRequest(`${table}?select=id`);
@@ -1018,10 +1142,32 @@ async function replaceTable(table, rows){
     }
 }
 
+async function syncResponsiblesToCloudOptional(){
+    try{
+        await replaceTable("responsibles", responsibles.map(responsibleToDb));
+        return true;
+    }catch(error){
+        // La app sigue funcionando aunque la tabla "responsibles" todavía no exista en Supabase.
+        console.warn("Catálogo de responsables sin sincronización en Supabase:", error);
+        return false;
+    }
+}
+
+async function loadCloudResponsiblesOptional(){
+    try{
+        const rows = await supabaseRequest("responsibles?select=*&order=created_at.asc");
+        return {available:true, rows:rows || []};
+    }catch(error){
+        console.warn("No existe o no está disponible la tabla responsibles en Supabase:", error);
+        return {available:false, rows:[]};
+    }
+}
+
 async function syncAllToCloud(){
     // Los cursos se sincronizan primero por la llave foránea de las tareas.
     await replaceTable("courses", courses.map(courseToDb));
     await replaceTable("tasks", tasks.map(taskToDb));
+    await syncResponsiblesToCloudOptional();
 }
 
 async function loadCloudData(){
@@ -1029,22 +1175,38 @@ async function loadCloudData(){
         supabaseRequest("courses?select=*&order=created_at.asc"),
         supabaseRequest("tasks?select=*&order=created_at.asc")
     ]);
+    const responsibleCloud = await loadCloudResponsiblesOptional();
 
     const hasCloudData = (cloudCourses && cloudCourses.length) || (cloudTasks && cloudTasks.length);
-    const hasLocalData = courses.length || tasks.length;
+    const hasLocalData = courses.length || tasks.length || responsibles.length;
 
     cloudReady = true;
 
     // Primera conexión: si Supabase está vacío, se migran los datos actuales del navegador.
     if(!hasCloudData && hasLocalData){
+        ensureResponsiblesFromTasks();
         await syncAllToCloud();
         return;
     }
 
     courses = (cloudCourses || []).map(courseFromDb);
     tasks = (cloudTasks || []).map(taskFromDb);
+
+    // Si la tabla compartida existe y ya tiene datos, se usan esos responsables.
+    // Si está vacía o no existe, se conserva el catálogo local y se completa desde las tareas.
+    if(responsibleCloud.available && responsibleCloud.rows.length){
+        responsibles = responsibleCloud.rows.map(responsibleFromDb);
+    }
+
+    ensureResponsiblesFromTasks();
+
     localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
     localStorage.setItem(COURSE_KEY, JSON.stringify(courses));
+    localStorage.setItem(RESPONSIBLE_KEY, JSON.stringify(responsibles));
+
+    if(responsibleCloud.available && !responsibleCloud.rows.length && responsibles.length){
+        await syncResponsiblesToCloudOptional();
+    }
 }
 
 async function refreshFromCloud(){
@@ -1054,13 +1216,35 @@ async function refreshFromCloud(){
             supabaseRequest("courses?select=*&order=created_at.asc"),
             supabaseRequest("tasks?select=*&order=created_at.asc")
         ]);
+        const responsibleCloud = await loadCloudResponsiblesOptional();
+
         const nextCourses = (cloudCourses || []).map(courseFromDb);
         const nextTasks = (cloudTasks || []).map(taskFromDb);
-        if(JSON.stringify(nextCourses) !== JSON.stringify(courses) || JSON.stringify(nextTasks) !== JSON.stringify(tasks)){
+        let nextResponsibles = responsibles;
+
+        if(responsibleCloud.available){
+            nextResponsibles = responsibleCloud.rows.map(responsibleFromDb);
+        }
+
+        // También se reconocen nombres antiguos o responsables que ya aparezcan en tareas.
+        nextTasks.forEach(task => {
+            const name = String(task.responsible || "").trim();
+            if(name && !nextResponsibles.some(r => r.name.toLowerCase() === name.toLowerCase())){
+                nextResponsibles.push({id:id(), name});
+            }
+        });
+
+        if(
+            JSON.stringify(nextCourses) !== JSON.stringify(courses) ||
+            JSON.stringify(nextTasks) !== JSON.stringify(tasks) ||
+            JSON.stringify(nextResponsibles) !== JSON.stringify(responsibles)
+        ){
             courses = nextCourses;
             tasks = nextTasks;
+            responsibles = nextResponsibles;
             localStorage.setItem(TASK_KEY, JSON.stringify(tasks));
             localStorage.setItem(COURSE_KEY, JSON.stringify(courses));
+            localStorage.setItem(RESPONSIBLE_KEY, JSON.stringify(responsibles));
             render();
         }
     }catch(error){
@@ -1152,6 +1336,39 @@ function getTaskCourseName(task){
         : task.course || "Sin curso";
 }
 
+function ensureResponsiblesFromTasks(){
+    let changed = false;
+
+    tasks.forEach(task => {
+        const name = String(task.responsible || "").trim();
+
+        if(!name){
+            return;
+        }
+
+        const exists = responsibles.some(
+            r => String(r.name || "").trim().toLowerCase() === name.toLowerCase()
+        );
+
+        if(!exists){
+            responsibles.push({
+                id:id(),
+                name
+            });
+            changed = true;
+        }
+    });
+
+    if(changed){
+        localStorage.setItem(RESPONSIBLE_KEY, JSON.stringify(responsibles));
+    }
+}
+
+function getResponsibleInitials(name=""){
+    const parts = String(name).trim().split(/\s+/).filter(Boolean);
+    return parts.slice(0,2).map(part => part[0]?.toUpperCase() || "").join("") || "R";
+}
+
 /* =========================================================
    MIGRACIÓN AUTOMÁTICA
    Convierte cursos antiguos escritos dentro de tareas
@@ -1206,6 +1423,7 @@ function migrateOldCourses(){
 }
 
 migrateOldCourses();
+ensureResponsiblesFromTasks();
 
 /* =========================================================
    NAVEGACIÓN
@@ -1281,6 +1499,16 @@ function render(){
             "Administrá los cursos del semestre.";
 
         content.innerHTML = renderCourses();
+    }
+
+    else if(currentView === "responsibles"){
+
+        title.textContent = "Responsables";
+
+        subtitle.textContent =
+            "Administrá las personas responsables de tus tareas.";
+
+        content.innerHTML = renderResponsibles();
     }
 
     else if(currentView === "completed"){
@@ -1544,6 +1772,23 @@ function renderTasks(){
 
         </select>
 
+        <select
+            class="filter-select"
+            id="filterResponsible"
+            onchange="filterTasks()">
+
+            <option value="">
+                Todos los responsables
+            </option>
+
+            ${responsibles.map(r => `
+                <option value="${escapeHTML(r.name)}">
+                    ${escapeHTML(r.name)}
+                </option>
+            `).join("")}
+
+        </select>
+
     </div>
 
     <div id="taskListContainer">
@@ -1575,6 +1820,11 @@ function filterTasks(){
             .getElementById("filterPriority")
             .value;
 
+    const responsible =
+        document
+            .getElementById("filterResponsible")
+            .value;
+
     const filtered =
         tasks.filter(task => {
 
@@ -1591,7 +1841,8 @@ function filterTasks(){
                 searchText.includes(text) &&
                 (!course || task.courseId === course) &&
                 (!status || task.status === status) &&
-                (!priority || task.priority === priority)
+                (!priority || task.priority === priority) &&
+                (!responsible || task.responsible === responsible)
             );
         });
 
@@ -1763,6 +2014,32 @@ function refreshCourseSelect(){
     `;
 }
 
+function refreshResponsibleSelect(selectedValue=""){
+
+    const select =
+        document.getElementById("taskResponsible");
+
+    select.innerHTML = `
+
+        <option value="">
+            Sin responsable
+        </option>
+
+        ${responsibles
+            .slice()
+            .sort((a,b) => a.name.localeCompare(b.name, "es"))
+            .map(responsible => `
+                <option value="${escapeHTML(responsible.name)}">
+                    ${escapeHTML(responsible.name)}
+                </option>
+            `).join("")}
+    `;
+
+    if(selectedValue){
+        select.value = selectedValue;
+    }
+}
+
 function openTaskModal(task=null){
 
     if(!courses.length){
@@ -1785,6 +2062,7 @@ function openTaskModal(task=null){
     form.reset();
 
     refreshCourseSelect();
+    refreshResponsibleSelect(task ? (task.responsible || "") : "");
 
     editingTaskId =
         task ? task.id : null;
@@ -2315,6 +2593,278 @@ function deleteCourse(courseId){
 }
 
 /* =========================================================
+   RESPONSABLES
+========================================================= */
+
+function renderResponsibles(){
+
+    if(!responsibles.length){
+
+        return `
+        <div class="panel">
+
+            ${emptyState(
+                "👥",
+                "Todavía no hay responsables registrados."
+            )}
+
+            <div style="text-align:center">
+
+                <button
+                    class="btn primary"
+                    onclick="openResponsibleModal()">
+                    + Agregar primer responsable
+                </button>
+
+            </div>
+
+        </div>
+        `;
+    }
+
+    const ordered = responsibles
+        .slice()
+        .sort((a,b) => a.name.localeCompare(b.name, "es"));
+
+    return `
+
+    <div class="responsible-grid">
+
+        ${ordered.map(responsible => {
+
+            const assigned =
+                tasks.filter(
+                    t => t.responsible === responsible.name
+                ).length;
+
+            const pending =
+                tasks.filter(
+                    t =>
+                    t.responsible === responsible.name &&
+                    t.status !== "Completada"
+                ).length;
+
+            return `
+
+            <div class="responsible-card">
+
+                <div class="responsible-head">
+
+                    <div class="responsible-avatar">
+                        ${escapeHTML(getResponsibleInitials(responsible.name))}
+                    </div>
+
+                    <div>
+                        <div class="responsible-name">
+                            ${escapeHTML(responsible.name)}
+                        </div>
+
+                        <div class="responsible-meta">
+                            ${assigned} tarea(s) · ${pending} pendiente(s)
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="responsible-actions">
+
+                    <button
+                        class="btn small"
+                        onclick="editResponsible('${responsible.id}')">
+                        Editar
+                    </button>
+
+                    <button
+                        class="btn small danger"
+                        onclick="deleteResponsible('${responsible.id}')">
+                        Eliminar
+                    </button>
+
+                </div>
+
+            </div>
+            `;
+
+        }).join("")}
+
+    </div>
+    `;
+}
+
+function openResponsibleModal(responsible=null){
+
+    const form =
+        document.getElementById("responsibleForm");
+
+    form.reset();
+
+    editingResponsibleId =
+        responsible ? responsible.id : null;
+
+    document
+        .getElementById("responsibleModalTitle")
+        .textContent =
+        responsible
+        ? "Editar responsable"
+        : "Nuevo responsable";
+
+    if(responsible){
+        document.getElementById("responsibleName").value = responsible.name || "";
+    }
+
+    document
+        .getElementById("responsibleDialog")
+        .showModal();
+}
+
+function closeResponsibleModal(){
+
+    document
+        .getElementById("responsibleForm")
+        .reset();
+
+    editingResponsibleId = null;
+
+    document
+        .getElementById("responsibleDialog")
+        .close();
+}
+
+document
+    .getElementById("responsibleForm")
+    .addEventListener(
+        "submit",
+        event => {
+
+            event.preventDefault();
+
+            const name =
+                document
+                    .getElementById("responsibleName")
+                    .value
+                    .trim();
+
+            if(!name){
+                return;
+            }
+
+            const duplicate = responsibles.find(
+                r =>
+                    r.id !== editingResponsibleId &&
+                    String(r.name || "").trim().toLowerCase() === name.toLowerCase()
+            );
+
+            if(duplicate){
+                alert("Ya existe un responsable con ese nombre.");
+                return;
+            }
+
+            if(editingResponsibleId){
+
+                const index =
+                    responsibles.findIndex(
+                        r => r.id === editingResponsibleId
+                    );
+
+                if(index < 0){
+                    alert("No se encontró el responsable que se intenta editar.");
+                    return;
+                }
+
+                const oldName = responsibles[index].name;
+
+                responsibles[index] = {
+                    ...responsibles[index],
+                    name
+                };
+
+                // Al cambiar el nombre, también se actualizan las tareas ya asignadas.
+                tasks.forEach(task => {
+                    if(task.responsible === oldName){
+                        task.responsible = name;
+                    }
+                });
+
+            }else{
+
+                responsibles.push({
+                    id:id(),
+                    name
+                });
+            }
+
+            save();
+
+            closeResponsibleModal();
+
+            render();
+        }
+    );
+
+function editResponsible(responsibleId){
+
+    const responsible =
+        responsibles.find(
+            r => r.id === responsibleId
+        );
+
+    if(responsible){
+        openResponsibleModal(responsible);
+    }
+}
+
+function deleteResponsible(responsibleId){
+
+    const responsible =
+        responsibles.find(
+            r => r.id === responsibleId
+        );
+
+    if(!responsible){
+        return;
+    }
+
+    const related =
+        tasks.filter(
+            t => t.responsible === responsible.name
+        );
+
+    const warning = related.length
+        ? `\n\nTiene ${related.length} tarea(s) asociada(s). Si se elimina, esas tareas quedarán sin responsable.`
+        : "";
+
+    const firstConfirmation = confirm(
+        `¿Seguro que querés eliminar al responsable "${responsible.name}"?${warning}`
+    );
+
+    if(!firstConfirmation){
+        return;
+    }
+
+    const secondConfirmation = confirm(
+        `CONFIRMACIÓN FINAL\n\n¿Querés eliminar definitivamente a "${responsible.name}"?`
+    );
+
+    if(!secondConfirmation){
+        return;
+    }
+
+    tasks.forEach(task => {
+        if(task.responsible === responsible.name){
+            task.responsible = "";
+        }
+    });
+
+    responsibles =
+        responsibles.filter(
+            r => r.id !== responsibleId
+        );
+
+    save();
+    render();
+}
+
+/* =========================================================
    CALENDARIO
 ========================================================= */
 
@@ -2488,6 +3038,11 @@ configureDialog(
     closeCourseModal
 );
 
+configureDialog(
+    document.getElementById("responsibleDialog"),
+    closeResponsibleModal
+);
+
 /* =========================================================
    EXPORTAR RESPALDO
 ========================================================= */
@@ -2498,12 +3053,14 @@ function exportData(){
 
         app:"UniTask",
 
-        version:3,
+        version:4,
 
         exportedAt:
             new Date().toISOString(),
 
         courses:courses,
+
+        responsibles:responsibles,
 
         tasks:tasks
     };
@@ -2567,6 +3124,7 @@ function importData(event){
 
             let importedTasks = [];
             let importedCourses = [];
+            let importedResponsibles = [];
 
             /*
                Respaldo nuevo
@@ -2583,6 +3141,11 @@ function importData(event){
                 importedCourses =
                     Array.isArray(data.courses)
                     ? data.courses
+                    : [];
+
+                importedResponsibles =
+                    Array.isArray(data.responsibles)
+                    ? data.responsibles
                     : [];
 
             }
@@ -2619,6 +3182,11 @@ function importData(event){
 
             courses =
                 importedCourses;
+
+            responsibles =
+                importedResponsibles;
+
+            ensureResponsiblesFromTasks();
 
             save();
 
