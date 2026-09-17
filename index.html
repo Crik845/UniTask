@@ -2589,7 +2589,7 @@ function ensureResponsiblesFromTasks(){
                 responsibles.push({
                     id:id(),
                     name,
-                    color
+                    color:getFallbackResponsibleColor(name)
                 });
                 changed = true;
             }
