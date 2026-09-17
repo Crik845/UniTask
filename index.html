@@ -1024,6 +1024,108 @@ textarea{
     font-size:12px;
 }
 
+
+.schedule-picker-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.schedule-picker-card{
+    --course-color:var(--accent);
+    border:1px solid #2b3340;
+    border-radius:12px;
+    background:#12161d;
+    overflow:hidden;
+    transition:.18s ease;
+}
+
+.schedule-picker-card.selected{
+    border-color:color-mix(in srgb,var(--course-color) 65%,var(--border));
+    background:linear-gradient(135deg,color-mix(in srgb,var(--course-color) 10%,#151a21),#12161d 72%);
+    box-shadow:0 0 0 1px color-mix(in srgb,var(--course-color) 18%,transparent);
+}
+
+.schedule-picker-card::before{
+    content:"";
+    display:block;
+    height:4px;
+    background:var(--course-color);
+}
+
+.schedule-picker-main{
+    width:100%;
+    border:0;
+    background:transparent;
+    color:inherit;
+    padding:12px;
+    text-align:left;
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:10px;
+    align-items:start;
+}
+
+.schedule-picker-main:hover{
+    background:#171c24;
+}
+
+.schedule-picker-name{
+    font-weight:800;
+    line-height:1.25;
+}
+
+.schedule-picker-meta{
+    color:var(--muted);
+    font-size:11px;
+    margin-top:4px;
+    line-height:1.45;
+}
+
+.schedule-picker-state{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    min-height:28px;
+    padding:5px 8px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    color:#cbd5e1;
+    font-size:11px;
+    white-space:nowrap;
+}
+
+.schedule-picker-card.selected .schedule-picker-state{
+    border-color:color-mix(in srgb,var(--course-color) 55%,var(--border));
+    background:color-mix(in srgb,var(--course-color) 16%,#151920);
+    color:white;
+}
+
+.schedule-picker-footer{
+    padding:0 12px 12px;
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.schedule-picker-warning{
+    color:#fcd34d;
+    font-size:11px;
+}
+
+.schedule-source-note{
+    margin-bottom:12px;
+    padding:9px 10px;
+    border-radius:9px;
+    background:#12161d;
+    border:1px solid var(--border);
+    color:#aeb7c6;
+    font-size:11px;
+    line-height:1.45;
+}
+
 .schedule-scroll{
     overflow:auto;
     border:1px solid var(--border);
@@ -1171,6 +1273,85 @@ textarea{
 
 @media(max-width:1100px){
     .schedule-layout{
+        grid-template-columns:1fr;
+    }
+}
+
+
+/* HORARIO ESTRUCTURADO EN CURSOS */
+.course-schedule-help{
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.45;
+    margin-bottom:2px;
+}
+.course-schedule-rows{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:4px;
+}
+.course-schedule-row{
+    display:grid;
+    grid-template-columns:minmax(145px,1.25fr) minmax(205px,1fr) 34px minmax(205px,1fr) auto;
+    gap:10px;
+    align-items:end;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#13171d;
+}
+.course-schedule-field{
+    min-width:0;
+}
+.course-schedule-field > span{
+    display:block;
+    color:var(--muted);
+    font-size:11px;
+    margin-bottom:5px;
+}
+.course-time-pair{
+    display:grid;
+    grid-template-columns:minmax(78px,1fr) minmax(70px,.85fr);
+    gap:7px;
+}
+.course-time-separator{
+    align-self:center;
+    padding-bottom:10px;
+    color:var(--muted);
+    text-align:center;
+    font-weight:700;
+}
+.course-schedule-remove{
+    min-width:40px;
+    min-height:40px;
+    padding:7px 9px;
+}
+.course-schedule-preview{
+    margin-top:10px;
+    padding:9px 11px;
+    border:1px dashed var(--border);
+    border-radius:8px;
+    color:#cbd5e1;
+    background:#111419;
+    font-size:12px;
+}
+.course-schedule-preview strong{
+    color:white;
+}
+@media(max-width:900px){
+    .course-schedule-row{
+        grid-template-columns:1fr 1fr;
+    }
+    .course-time-separator{
+        display:none;
+    }
+    .course-schedule-remove{
+        justify-self:start;
+    }
+}
+@media(max-width:560px){
+    .course-schedule-row{
         grid-template-columns:1fr;
     }
 }
@@ -1495,12 +1676,18 @@ textarea{
                 >
             </div>
 
-            <div class="form-group">
-                <label>Horario</label>
-                <input
-                    id="courseSchedule"
-                    placeholder="Ej. Martes 5:00 p. m."
-                >
+            <div class="form-group full">
+                <label>Horario del curso</label>
+                <div class="course-schedule-help">
+                    Seleccioná el día y la hora. UniTask mantiene un formato uniforme y utiliza estos mismos datos para construir automáticamente los horarios de cada responsable.
+                </div>
+                <input type="hidden" id="courseSchedule">
+                <div id="courseScheduleRows" class="course-schedule-rows"></div>
+                <div>
+                    <button type="button" class="btn small" onclick="addCourseScheduleRow()">
+                        + Agregar otro día / bloque
+                    </button>
+                </div>
             </div>
 
             <div class="form-group">
@@ -3244,6 +3431,189 @@ function renderCourses(){
     `;
 }
 
+
+/* =========================================================
+   HORARIO ESTRUCTURADO DE CURSOS
+========================================================= */
+
+const COURSE_SCHEDULE_HOURS = Array.from({length:24}, (_,index) => String(index).padStart(2,"0"));
+const COURSE_SCHEDULE_MINUTES = Array.from({length:12}, (_,index) => String(index * 5).padStart(2,"0"));
+
+function scheduleSelectOptions(values, selectedValue="", placeholder="Seleccionar"){
+    return `<option value="">${placeholder}</option>` + values.map(value =>
+        `<option value="${value}" ${String(value) === String(selectedValue) ? "selected" : ""}>${value}</option>`
+    ).join("");
+}
+
+function splitScheduleTime(value=""){
+    const match = String(value || "").match(/^(\d{1,2}):(\d{2})$/);
+    if(!match) return {hour:"", minute:""};
+    return {
+        hour:String(Number(match[1])).padStart(2,"0"),
+        minute:String(Number(match[2])).padStart(2,"0")
+    };
+}
+
+function createCourseScheduleRow(session={}){
+    const start = splitScheduleTime(session.start || "");
+    const end = splitScheduleTime(session.end || "");
+    const day = Number(session.day || 0);
+
+    return `
+        <div class="course-schedule-row">
+            <div class="course-schedule-field">
+                <span>Día</span>
+                <select class="course-schedule-day" onchange="updateCourseSchedulePreview()">
+                    <option value="">Seleccionar día</option>
+                    ${SCHEDULE_DAYS.map(item => `
+                        <option value="${item.value}" ${day === item.value ? "selected" : ""}>${item.name}</option>
+                    `).join("")}
+                </select>
+            </div>
+
+            <div class="course-schedule-field">
+                <span>Hora de inicio</span>
+                <div class="course-time-pair">
+                    <select class="course-start-hour" onchange="updateCourseSchedulePreview()">
+                        ${scheduleSelectOptions(COURSE_SCHEDULE_HOURS, start.hour, "Hora")}
+                    </select>
+                    <select class="course-start-minute" onchange="updateCourseSchedulePreview()">
+                        ${scheduleSelectOptions(COURSE_SCHEDULE_MINUTES, start.minute, "Min")}
+                    </select>
+                </div>
+            </div>
+
+            <div class="course-time-separator">→</div>
+
+            <div class="course-schedule-field">
+                <span>Hora de finalización</span>
+                <div class="course-time-pair">
+                    <select class="course-end-hour" onchange="updateCourseSchedulePreview()">
+                        ${scheduleSelectOptions(COURSE_SCHEDULE_HOURS, end.hour, "Hora")}
+                    </select>
+                    <select class="course-end-minute" onchange="updateCourseSchedulePreview()">
+                        ${scheduleSelectOptions(COURSE_SCHEDULE_MINUTES, end.minute, "Min")}
+                    </select>
+                </div>
+            </div>
+
+            <button
+                type="button"
+                class="btn small danger course-schedule-remove"
+                onclick="removeCourseScheduleRow(this)"
+                title="Eliminar este bloque">
+                ✕
+            </button>
+        </div>
+    `;
+}
+
+function renderCourseScheduleRows(sessions=[]){
+    const container = document.getElementById("courseScheduleRows");
+    if(!container) return;
+
+    const normalized = Array.isArray(sessions) ? sessions : [];
+    container.innerHTML = normalized.length
+        ? normalized.map(session => createCourseScheduleRow(session)).join("")
+        : createCourseScheduleRow();
+
+    const preview = document.createElement("div");
+    preview.id = "courseSchedulePreview";
+    preview.className = "course-schedule-preview";
+    container.insertAdjacentElement("afterend", preview);
+    updateCourseSchedulePreview();
+}
+
+function addCourseScheduleRow(session={}){
+    const container = document.getElementById("courseScheduleRows");
+    if(!container) return;
+    container.insertAdjacentHTML("beforeend", createCourseScheduleRow(session));
+    updateCourseSchedulePreview();
+}
+
+function removeCourseScheduleRow(button){
+    const row = button?.closest(".course-schedule-row");
+    const container = document.getElementById("courseScheduleRows");
+    if(row) row.remove();
+    if(container && !container.querySelector(".course-schedule-row")){
+        container.insertAdjacentHTML("beforeend", createCourseScheduleRow());
+    }
+    updateCourseSchedulePreview();
+}
+
+function readCourseScheduleRows({validate=false}={}){
+    const rows = [...document.querySelectorAll("#courseScheduleRows .course-schedule-row")];
+    const sessions = [];
+
+    for(const row of rows){
+        const day = Number(row.querySelector(".course-schedule-day")?.value || 0);
+        const startHour = row.querySelector(".course-start-hour")?.value || "";
+        const startMinute = row.querySelector(".course-start-minute")?.value || "";
+        const endHour = row.querySelector(".course-end-hour")?.value || "";
+        const endMinute = row.querySelector(".course-end-minute")?.value || "";
+
+        const anyValue = day || startHour || startMinute || endHour || endMinute;
+        const complete = day && startHour && startMinute && endHour && endMinute;
+
+        if(!anyValue) continue;
+
+        if(!complete){
+            if(validate){
+                return {sessions:[], error:"Completá el día, la hora de inicio y la hora de finalización de cada bloque del curso."};
+            }
+            continue;
+        }
+
+        const start = `${startHour}:${startMinute}`;
+        const end = `${endHour}:${endMinute}`;
+        const startTotal = timeToMinutes(start);
+        const endTotal = timeToMinutes(end);
+
+        if(startTotal === null || endTotal === null || endTotal <= startTotal){
+            if(validate){
+                return {sessions:[], error:`La hora final debe ser posterior a la hora inicial en ${getScheduleDayName(day)}.`};
+            }
+            continue;
+        }
+
+        sessions.push({day,start,end});
+    }
+
+    const unique = [];
+    const keys = new Set();
+    sessions
+        .sort((a,b) => a.day - b.day || a.start.localeCompare(b.start))
+        .forEach(session => {
+            const key = `${session.day}-${session.start}-${session.end}`;
+            if(!keys.has(key)){
+                keys.add(key);
+                unique.push(session);
+            }
+        });
+
+    return {sessions:unique,error:""};
+}
+
+function formatCourseSchedule(sessions=[]){
+    return sessions.map(session =>
+        `${getScheduleDayName(session.day)} ${session.start}-${session.end}`
+    ).join(" / ");
+}
+
+function updateCourseSchedulePreview(){
+    const input = document.getElementById("courseSchedule");
+    const preview = document.getElementById("courseSchedulePreview");
+    if(!input || !preview) return;
+
+    const result = readCourseScheduleRows();
+    const formatted = formatCourseSchedule(result.sessions);
+    input.value = formatted;
+
+    preview.innerHTML = formatted
+        ? `<strong>Horario:</strong> ${escapeHTML(formatted)}`
+        : `<span class="muted">El horario es opcional. Agregá un bloque cuando el curso tenga un día y una hora definidos.</span>`;
+}
+
 /* =========================================================
    MODAL CURSO
 ========================================================= */
@@ -3271,10 +3641,22 @@ function openCourseModal(course=null){
         document.getElementById("courseName").value = course.name || "";
         document.getElementById("courseCode").value = course.code || "";
         document.getElementById("courseProfessor").value = course.professor || "";
-        document.getElementById("courseSchedule").value = course.schedule || "";
         document.getElementById("courseRoom").value = course.room || "";
         document.getElementById("courseColor").value = course.color || "#7c6df2";
         document.getElementById("courseNotes").value = course.notes || "";
+    }
+
+    const currentSchedule = course?.schedule || "";
+    const parsedSessions = currentSchedule ? parseCourseSchedule({schedule:currentSchedule, room:course?.room || ""}) : [];
+    document.getElementById("courseSchedule").dataset.legacySchedule = currentSchedule;
+    renderCourseScheduleRows(parsedSessions);
+
+    // Si un formato histórico no se logró interpretar, se conserva hasta que el usuario lo reemplace.
+    if(currentSchedule && !parsedSessions.length){
+        const preview = document.getElementById("courseSchedulePreview");
+        if(preview){
+            preview.innerHTML = `<strong>Horario anterior:</strong> ${escapeHTML(currentSchedule)}<br><span class="muted">Seleccioná el día y las horas en los desplegables para normalizarlo.</span>`;
+        }
     }
 
     document
@@ -3289,6 +3671,11 @@ function closeCourseModal(){
         .reset();
 
     editingCourseId = null;
+
+    const scheduleRows = document.getElementById("courseScheduleRows");
+    if(scheduleRows) scheduleRows.innerHTML = "";
+    const schedulePreview = document.getElementById("courseSchedulePreview");
+    if(schedulePreview) schedulePreview.remove();
 
     document
         .getElementById("courseDialog")
@@ -3306,6 +3693,17 @@ function saveCourseFromForm(){
     const notesInput = document.getElementById("courseNotes");
 
     if (!form.reportValidity()) return;
+
+    const scheduleResult = readCourseScheduleRows({validate:true});
+    if(scheduleResult.error){
+        alert(scheduleResult.error);
+        return;
+    }
+
+    const normalizedSchedule = formatCourseSchedule(scheduleResult.sessions);
+    const legacySchedule = scheduleInput.dataset.legacySchedule || "";
+    // Si se abrió un horario histórico no interpretable y no se cambió aún, no se pierde el dato.
+    scheduleInput.value = normalizedSchedule || (scheduleResult.sessions.length ? "" : legacySchedule);
 
     const name = nameInput.value.trim();
     const duplicate = courses.find(c =>
@@ -3400,7 +3798,7 @@ function deleteCourse(courseId){
 
         const reasons = [];
         if(related.length) reasons.push(`${related.length} tarea(s)`);
-        if(scheduleRelated.length) reasons.push(`${scheduleRelated.length} bloque(s) de horario`);
+        if(scheduleRelated.length) reasons.push(`${scheduleRelated.length} horario(s) de responsable`);
 
         alert(
             `No se puede eliminar "${course.name}" porque tiene ${reasons.join(" y ")} asociado(s).\n\nEliminá o cambiá esas referencias primero.`
@@ -3832,19 +4230,24 @@ const SCHEDULE_DAYS = [
 ];
 
 function normalizeScheduleEntries(){
-    scheduleEntries = (Array.isArray(scheduleEntries) ? scheduleEntries : [])
-        .filter(entry => entry && entry.id && entry.responsibleId && entry.courseId)
-        .map(entry => ({
-            id:String(entry.id),
-            responsibleId:String(entry.responsibleId),
-            courseId:String(entry.courseId),
-            day:Math.min(7, Math.max(1, Number(entry.day || 1))),
-            start:String(entry.start || "07:30").slice(0,5),
-            end:String(entry.end || "09:20").slice(0,5),
-            room:String(entry.room || ""),
-            notes:String(entry.notes || "")
-        }));
+    const source = Array.isArray(scheduleEntries) ? scheduleEntries : [];
+    const unique = new Map();
 
+    source.forEach(entry => {
+        if(!entry || !entry.responsibleId || !entry.courseId) return;
+        const responsibleId = String(entry.responsibleId);
+        const courseId = String(entry.courseId);
+        const key = `${responsibleId}::${courseId}`;
+        if(!unique.has(key)){
+            unique.set(key, {
+                id:String(entry.id || id()),
+                responsibleId,
+                courseId
+            });
+        }
+    });
+
+    scheduleEntries = [...unique.values()];
     localStorage.setItem(SCHEDULE_KEY, JSON.stringify(scheduleEntries));
 }
 
@@ -3868,10 +4271,99 @@ function getScheduleDayName(day){
     return SCHEDULE_DAYS.find(item => item.value === Number(day))?.name || "Día";
 }
 
-function getScheduleEntriesForResponsible(responsibleId){
+function normalizeScheduleText(value=""){
+    return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[–—]/g, "-")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+function dayTokenToNumber(token=""){
+    const t = normalizeScheduleText(token).toLowerCase().replace(/\./g, "");
+    const map = {
+        "l":1, "lun":1, "lunes":1,
+        "k":2, "ma":2, "mar":2, "martes":2,
+        "m":3, "mi":3, "mie":3, "miercoles":3,
+        "j":4, "jue":4, "jueves":4,
+        "v":5, "vie":5, "viernes":5,
+        "s":6, "sab":6, "sabado":6,
+        "d":7, "dom":7, "domingo":7
+    };
+    return map[t] || null;
+}
+
+function parseCourseSchedule(course){
+    const raw = normalizeScheduleText(course?.schedule || "");
+    if(!raw) return [];
+
+    const sessions = [];
+    const seen = new Set();
+    const normalizeLooseTime = value => {
+        const match = String(value || "").trim().match(/^(\d{1,2}):(\d{1,2})$/);
+        if(!match) return "";
+        const hour = Number(match[1]);
+        const minute = Number(match[2]);
+        if(hour < 0 || hour > 23 || minute < 0 || minute > 59) return "";
+        return `${String(hour).padStart(2,"0")}:${String(minute).padStart(2,"0")}`;
+    };
+
+    const addSession = (day,start,end) => {
+        const dayNum = Number(day);
+        const normalizedStart = normalizeLooseTime(start);
+        const normalizedEnd = normalizeLooseTime(end);
+        const startMinutes = timeToMinutes(normalizedStart);
+        const endMinutes = timeToMinutes(normalizedEnd);
+        if(!dayNum || startMinutes === null || endMinutes === null || endMinutes <= startMinutes) return;
+        const key = `${dayNum}-${normalizedStart}-${normalizedEnd}`;
+        if(seen.has(key)) return;
+        seen.add(key);
+        sessions.push({day:dayNum,start:normalizedStart,end:normalizedEnd,room:String(course?.room || "")});
+    };
+
+    // Casos como: "L 07:30-09:20 / J 07:30-09:20" o "Martes 17:00-20:20".
+    const pairPattern = /\b(lunes|lun|l|martes|mar|ma|k|miercoles|mie|mi|m|jueves|jue|j|viernes|vie|v|sabado|sab|s|domingo|dom|d)\b\s*(?:de\s*)?[:\-]?\s*(\d{1,2}:\d{1,2})\s*(?:-|a)\s*(\d{1,2}:\d{1,2})/gi;
+    let match;
+    while((match = pairPattern.exec(raw))){
+        addSession(dayTokenToNumber(match[1]), match[2], match[3]);
+    }
+
+    // Casos como: "L y J 07:30-09:20".
+    const segments = raw.split(/[;/\n|]+/).map(part => part.trim()).filter(Boolean);
+    segments.forEach(segment => {
+        const timeMatch = segment.match(/(\d{1,2}:\d{1,2})\s*(?:-|a)\s*(\d{1,2}:\d{1,2})/i);
+        if(!timeMatch) return;
+        const beforeTime = segment.slice(0, timeMatch.index);
+        const tokens = beforeTime.match(/\b(lunes|lun|l|martes|mar|ma|k|miercoles|mie|mi|m|jueves|jue|j|viernes|vie|v|sabado|sab|s|domingo|dom|d)\b/gi) || [];
+        tokens.forEach(token => addSession(dayTokenToNumber(token), timeMatch[1], timeMatch[2]));
+    });
+
+    return sessions.sort((a,b) => a.day - b.day || a.start.localeCompare(b.start));
+}
+
+function getScheduleAssignmentsForResponsible(responsibleId){
     return scheduleEntries
         .filter(entry => entry.responsibleId === responsibleId)
-        .filter(entry => getCourse(entry.courseId))
+        .filter(entry => getCourse(entry.courseId));
+}
+
+function getScheduleEntriesForResponsible(responsibleId){
+    return getScheduleAssignmentsForResponsible(responsibleId)
+        .flatMap(assignment => {
+            const course = getCourse(assignment.courseId);
+            return parseCourseSchedule(course).map((session,index) => ({
+                id:`${assignment.id}-${index}`,
+                assignmentId:assignment.id,
+                responsibleId:assignment.responsibleId,
+                courseId:assignment.courseId,
+                day:session.day,
+                start:session.start,
+                end:session.end,
+                room:session.room,
+                notes:""
+            }));
+        })
         .sort((a,b) => Number(a.day) - Number(b.day) || (a.start || "").localeCompare(b.start || ""));
 }
 
@@ -4005,8 +4497,8 @@ function renderScheduleBoard(entries){
                     type="button"
                     class="schedule-class-block"
                     style="--course-color:${course.color || '#7c6df2'};top:${top}px;height:${blockHeight}px;left:calc(${left}% + 4px);width:calc(${width}% - 8px)"
-                    onclick="editScheduleEntry('${entry.id}')"
-                    title="Editar ${escapeHTML(course.name)}">
+                    onclick="editCourse('${course.id}')"
+                    title="Editar ${escapeHTML(course.name)} desde Cursos">
                     <div class="schedule-class-name">${escapeHTML(course.name)}</div>
                     <div class="schedule-class-time">${escapeHTML(entry.start)}–${escapeHTML(entry.end)}</div>
                     ${entry.room ? `<div class="schedule-class-room">📍 ${escapeHTML(entry.room)}</div>` : ""}
@@ -4033,6 +4525,23 @@ function renderScheduleBoard(entries){
     `;
 }
 
+function toggleCourseForSchedule(responsibleId, courseId){
+    const responsible = responsibles.find(r => r.id === responsibleId);
+    const course = getCourse(courseId);
+    if(!responsible || !course) return;
+
+    const index = scheduleEntries.findIndex(entry => entry.responsibleId === responsibleId && entry.courseId === courseId);
+    if(index >= 0){
+        scheduleEntries.splice(index,1);
+    }else{
+        scheduleEntries.push({id:id(), responsibleId, courseId});
+    }
+
+    selectedScheduleResponsibleId = responsibleId;
+    save();
+    render();
+}
+
 function renderSchedule(){
     normalizeScheduleEntries();
 
@@ -4051,20 +4560,23 @@ function renderSchedule(){
     if(!responsible) return "";
 
     const orderedResponsibles = responsibles.slice().sort((a,b) => a.name.localeCompare(b.name,"es"));
+    const assignments = getScheduleAssignmentsForResponsible(responsible.id);
+    const assignedIds = new Set(assignments.map(entry => entry.courseId));
     const entries = getScheduleEntriesForResponsible(responsible.id);
-    const groups = groupScheduleByCourse(entries);
     const personColor = responsible.color || getResponsibleColor(responsible.name);
-    const uniqueCourses = new Set(entries.map(entry => entry.courseId)).size;
     const weeklyMinutes = entries.reduce((sum,entry) => {
         const start = timeToMinutes(entry.start);
         const end = timeToMinutes(entry.end);
         return sum + (start !== null && end !== null && end > start ? end - start : 0);
     },0);
+    const unparsedSelected = assignments
+        .map(assignment => getCourse(assignment.courseId))
+        .filter(course => course && parseCourseSchedule(course).length === 0);
 
     return `
         <div class="schedule-person-tabs">
             ${orderedResponsibles.map(person => {
-                const count = getScheduleEntriesForResponsible(person.id).length;
+                const count = getScheduleAssignmentsForResponsible(person.id).length;
                 const color = person.color || getResponsibleColor(person.name);
                 return `
                     <button type="button" class="schedule-person-tab ${person.id === responsible.id ? 'active' : ''}" style="--person-color:${color}" onclick="selectScheduleResponsible('${person.id}')">
@@ -4081,52 +4593,55 @@ function renderSchedule(){
                 <div class="schedule-hero-avatar">${escapeHTML(getResponsibleInitials(responsible.name))}</div>
                 <div>
                     <h2>Horario de ${escapeHTML(responsible.name)}</h2>
-                    <p>Cada horario es independiente: aquí solo aparecen los cursos asignados a esta persona.</p>
+                    <p>Seleccioná los cursos existentes. El horario, aula, profesor y color se toman automáticamente del catálogo de Cursos.</p>
                 </div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-                <button class="btn" onclick="openCourseModal()">+ Crear curso</button>
-                <button class="btn primary" onclick="openScheduleModal(null,'${responsible.id}')">+ Agregar clase</button>
+                <button class="btn" onclick="goToView('courses')">Administrar cursos</button>
             </div>
         </section>
 
         <div class="schedule-layout">
             <aside class="schedule-course-panel">
                 <div class="schedule-section-head">
-                    <h3>Cursos de ${escapeHTML(responsible.name)}</h3>
-                    <span class="muted">${uniqueCourses}</span>
+                    <h3>Cursos disponibles</h3>
+                    <span class="muted">${assignments.length}/${courses.length}</span>
                 </div>
 
                 <div class="schedule-summary">
-                    <span class="schedule-summary-chip">📚 ${uniqueCourses} curso(s)</span>
+                    <span class="schedule-summary-chip">📚 ${assignments.length} agregado(s)</span>
                     <span class="schedule-summary-chip">🧩 ${entries.length} bloque(s)</span>
                     <span class="schedule-summary-chip">⏱ ${Math.floor(weeklyMinutes/60)} h ${weeklyMinutes%60} min/semana</span>
                 </div>
 
-                ${groups.length ? `
-                    <div class="schedule-course-list">
-                        ${groups.map(group => {
-                            const course = group.course;
+                <div class="schedule-source-note">
+                    Los datos se reutilizan desde <strong>Cursos</strong>. Si se cambia allí el horario, aula, profesor o color, este horario se actualiza automáticamente.
+                </div>
+
+                ${courses.length ? `
+                    <div class="schedule-picker-list">
+                        ${courses.slice().sort((a,b) => a.name.localeCompare(b.name,"es")).map(course => {
+                            const selected = assignedIds.has(course.id);
+                            const sessions = parseCourseSchedule(course);
                             return `
-                                <div class="schedule-course-item" style="--course-color:${course.color || '#7c6df2'}">
-                                    <div class="schedule-course-body">
-                                        <div class="schedule-course-name">${escapeHTML(course.name)}</div>
-                                        ${course.code ? `<div class="schedule-course-code">${escapeHTML(course.code)}</div>` : ""}
-                                        <div class="schedule-session-list">
-                                            ${group.sessions.map(session => `
-                                                <div class="schedule-session">
-                                                    <div>
-                                                        <div class="schedule-session-time">${escapeHTML(getScheduleDayName(session.day))} · ${escapeHTML(session.start)}–${escapeHTML(session.end)}</div>
-                                                        <div class="schedule-session-meta">${session.room ? `📍 ${escapeHTML(session.room)}` : "Sin aula registrada"}</div>
-                                                    </div>
-                                                    <div class="schedule-session-actions">
-                                                        <button class="icon-btn" onclick="editScheduleEntry('${session.id}')" title="Modificar">✎</button>
-                                                        <button class="icon-btn" onclick="deleteScheduleEntry('${session.id}')" title="Eliminar bloque">🗑</button>
-                                                    </div>
-                                                </div>
-                                            `).join("")}
+                                <div class="schedule-picker-card ${selected ? 'selected' : ''}" style="--course-color:${course.color || '#7c6df2'}">
+                                    <button type="button" class="schedule-picker-main" onclick="toggleCourseForSchedule('${responsible.id}','${course.id}')">
+                                        <div style="min-width:0">
+                                            <div class="schedule-picker-name">${escapeHTML(course.name)}</div>
+                                            <div class="schedule-picker-meta">
+                                                ${course.code ? `🏷 ${escapeHTML(course.code)}<br>` : ""}
+                                                ${course.professor ? `👨‍🏫 ${escapeHTML(course.professor)}<br>` : ""}
+                                                ${course.schedule ? `🕐 ${escapeHTML(course.schedule)}` : "🕐 Sin horario registrado"}
+                                                ${course.room ? `<br>📍 ${escapeHTML(course.room)}` : ""}
+                                            </div>
                                         </div>
-                                        <button class="btn small danger schedule-remove-course" onclick="removeCourseFromSchedule('${responsible.id}','${course.id}')">Quitar curso del horario</button>
+                                        <span class="schedule-picker-state">${selected ? "✓ Agregado" : "+ Agregar"}</span>
+                                    </button>
+                                    <div class="schedule-picker-footer">
+                                        <span class="${sessions.length ? 'muted' : 'schedule-picker-warning'}">
+                                            ${sessions.length ? `${sessions.length} bloque(s) detectado(s)` : "⚠ Revisar formato del horario"}
+                                        </span>
+                                        <button type="button" class="btn small" onclick="editCourse('${course.id}')">Editar curso</button>
                                     </div>
                                 </div>
                             `;
@@ -4135,8 +4650,8 @@ function renderSchedule(){
                 ` : `
                     <div class="schedule-empty">
                         <div class="empty-icon">📘</div>
-                        <div>Este horario todavía no tiene cursos.</div>
-                        <div style="margin-top:12px"><button class="btn primary" onclick="openScheduleModal(null,'${responsible.id}')">Agregar primera clase</button></div>
+                        <div>No hay cursos registrados todavía.</div>
+                        <div style="margin-top:12px"><button class="btn primary" onclick="goToView('courses')">Ir a Cursos</button></div>
                     </div>
                 `}
             </aside>
@@ -4146,7 +4661,15 @@ function renderSchedule(){
                     <h3>Vista semanal</h3>
                     <span class="muted">Lunes a domingo</span>
                 </div>
-                ${renderScheduleBoard(entries)}
+                ${entries.length ? renderScheduleBoard(entries) : `
+                    <div class="schedule-empty" style="min-height:340px;display:grid;place-items:center">
+                        <div>
+                            <div class="empty-icon">🗓️</div>
+                            <div>Seleccioná uno o más cursos para construir el horario.</div>
+                        </div>
+                    </div>
+                `}
+                ${unparsedSelected.length ? `<div class="schedule-conflict-note">⚠ ${unparsedSelected.length} curso(s) seleccionado(s) todavía conservan un horario antiguo que no se logró interpretar. Editalos en Cursos y seleccioná día, hora de inicio y hora final desde los desplegables.</div>` : ""}
                 ${detectScheduleConflicts(entries).length ? `<div class="schedule-conflict-note">⚠ Se detectaron ${detectScheduleConflicts(entries).length} cruce(s) de horario. Los bloques se muestran lado a lado para identificarlos.</div>` : ""}
             </section>
         </div>
@@ -4505,7 +5028,7 @@ function exportData(){
 
         app:"UniTask",
 
-        version:5,
+        version:6,
 
         exportedAt:
             new Date().toISOString(),
